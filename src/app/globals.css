@@ -3,11 +3,11 @@
 :root {
   color-scheme: dark;
 
-  --stage: #0b0f1a;
-  --stage-elevated: #151b2b;
-  --stage-border: #2a3548;
-  --foreground: #f4f4f5;
-  --muted: #a8b0c2;
+  --stage: #0a0a0a;
+  --stage-elevated: #141414;
+  --stage-border: #2e2e2e;
+  --foreground: #f5f5f5;
+  --muted: #a1a1aa;
   --gold: #e8b923;
   --gold-bright: #ffd54f;
   --gold-deep: #a67c00;

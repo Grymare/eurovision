@@ -3,11 +3,11 @@
  */
 export const designTokens = {
   colors: {
-    stage: "#0B0F1A",
-    stageElevated: "#151B2B",
-    stageBorder: "#2A3548",
-    foreground: "#F4F4F5",
-    muted: "#A8B0C2",
+    stage: "#0A0A0A",
+    stageElevated: "#141414",
+    stageBorder: "#2E2E2E",
+    foreground: "#F5F5F5",
+    muted: "#A1A1AA",
     gold: "#E8B923",
     goldBright: "#FFD54F",
     goldDeep: "#A67C00",

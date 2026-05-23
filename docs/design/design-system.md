@@ -6,7 +6,8 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 
 | Decision | Choice |
 |----------|--------|
-| Mood | **TV broadcast** — dark stage, spotlight feel, Eurovision night energy |
+| Mood | **TV broadcast** — black stage, gold spotlight, Eurovision night energy |
+| Color scheme | **Black / grey + gold** — neutral darks, no blue tint |
 | Default theme | **Dark** (no light mode in MVP; add toggle later if needed) |
 | Accent | **Gold / amber** — “douze points” trophy moments |
 | Presentation | **Fullscreen dark scoreboard** — huge type, minimal chrome, TV/projector first |
@@ -16,11 +17,11 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 
 | Token | Hex | Usage |
 |-------|-----|-------|
-| `--stage` | `#0B0F1A` | Page background (deep navy “arena”) |
-| `--stage-elevated` | `#151B2B` | Cards, panels |
-| `--stage-border` | `#2A3548` | Borders, dividers |
-| `--foreground` | `#F4F4F5` | Primary text on stage |
-| `--muted` | `#A8B0C2` | Secondary text, hints |
+| `--stage` | `#0A0A0A` | Page background (near-black) |
+| `--stage-elevated` | `#141414` | Cards, panels |
+| `--stage-border` | `#2E2E2E` | Borders, dividers |
+| `--foreground` | `#F5F5F5` | Primary text on dark surfaces |
+| `--muted` | `#A1A1AA` | Secondary text, hints (neutral grey) |
 | `--gold` | `#E8B923` | Primary buttons, key accents |
 | `--gold-bright` | `#FFD54F` | Highlights, 12-point emphasis |
 | `--gold-deep` | `#A67C00` | Borders on gold elements |
@@ -32,8 +33,8 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 
 | Pair | Ratio | Pass |
 |------|-------|------|
-| `--foreground` on `--stage` | ~16.5:1 | AA / AAA |
-| `--muted` on `--stage` | ~8.2:1 | AA / AAA |
+| `--foreground` on `--stage` | ~19:1 | AA / AAA |
+| `--muted` on `--stage` | ~7.5:1 | AA / AAA |
 | `--on-gold` on `--gold` | ~8.4:1 | AA / AAA |
 | `--gold-bright` on `--stage` (large text) | ~12:1 | AA large+ |
 | `--danger` on `--stage-elevated` | ~5.5:1 | AA |
