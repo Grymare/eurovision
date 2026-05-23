@@ -50,7 +50,7 @@ Run this after Cloudflare Tunnel hosting is configured. Test at **https://eurovi
 - [ ] Keyboard: tab through home → join → ballot primary actions
 - [ ] Visible focus on buttons and form controls
 - [ ] Skip link present (if implemented in layout)
-- [ ] Run axe DevTools on home, lobby, ballot — no critical violations
+- [ ] Run axe DevTools on home, lobby, ballot — no critical violations (see [accessibility.md](../accessibility.md))
 
 ## Security / production
 

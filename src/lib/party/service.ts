@@ -896,7 +896,6 @@ export async function getPresentationHostView(party: Party): Promise<Presentatio
 
   if (party.state === "finished") {
     const scoreboard = await getPartyScoresForPresentation(party.id, party.state);
-    const winner = scoreboard.rows[0];
 
     return {
       phase: "complete",

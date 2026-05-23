@@ -27,6 +27,8 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 | [EUP-017](tickets/EUP-017.md) | MVP smoke test checklist | `mvp`, `chore` |
 | [EUP-018](tickets/EUP-018.md) | Host-only presentation page | `mvp`, `feature` |
 | [EUP-019](tickets/EUP-019.md) | Eurovision dual-column scoreboard | `mvp`, `feature` |
+| [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
+| [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
 
 ## Review
 
@@ -38,10 +40,7 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 
 ## Ready
 
-| ID | Title | Labels |
-|----|-------|--------|
-| [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
-| [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
+*(empty)*
 
 ### Phase 2
 

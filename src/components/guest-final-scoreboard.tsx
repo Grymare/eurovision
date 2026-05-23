@@ -22,20 +22,45 @@ export function GuestFinalScoreboard({ partyCode, partyId }: GuestFinalScoreboar
       throw new Error(data.error ?? "Could not load final results");
     }
 
-    setRows(data.scores);
+    return data.scores;
   }, [partyCode]);
 
   useEffect(() => {
-    void loadScores().catch((loadError) => {
-      setError(loadError instanceof Error ? loadError.message : "Could not load final results");
-    });
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        const scores = await loadScores();
+        if (!cancelled) {
+          setRows(scores);
+        }
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(
+            loadError instanceof Error ? loadError.message : "Could not load final results",
+          );
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [loadScores]);
 
   usePartySocket({
     partyId,
     onVotingStatus: (payload: VotingStatusPayload) => {
       if (payload.party.state === "finished") {
-        void loadScores();
+        void loadScores()
+          .then((scores) => {
+            setRows(scores);
+          })
+          .catch((loadError) => {
+            setError(
+              loadError instanceof Error ? loadError.message : "Could not load final results",
+            );
+          });
       }
     },
   });

@@ -5,7 +5,7 @@ import { CountryFlag } from "@/components/country-flag";
 import { GuestFinalScoreboard } from "@/components/guest-final-scoreboard";
 import { VoteBallot } from "@/components/vote-ballot";
 import { usePartySocket } from "@/hooks/use-party-socket";
-import { canRemoveParticipant, MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
+import { canRemoveParticipant, isPartyState, MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
 import type { PartyOverviewResponse } from "@/lib/party/types";
 import type { SerializedVote } from "@/lib/party/types";
 import type {
@@ -216,7 +216,9 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
   const votingLocked = data.party.state !== "voting_open";
 
   const canRemoveJuryMembers =
-    data.viewer.isHost && canRemoveParticipant(data.party.state);
+    data.viewer.isHost &&
+    isPartyState(data.party.state) &&
+    canRemoveParticipant(data.party.state);
 
   if (data.party.state === "presenting" && !data.viewer.isHost) {
     return (
@@ -247,7 +249,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
       <section className="section-block space-y-6">
         <div className="space-y-3">
           <p className="eyebrow">Party code</p>
-          <div className="flex items-center justify-between gap-4">
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
             <p
               className={
                 data.viewer.isHost ?

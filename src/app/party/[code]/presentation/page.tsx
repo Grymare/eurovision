@@ -5,7 +5,6 @@ import {
   getPresentationHostView,
   listEntries,
   serializeEntry,
-  serializeParty,
 } from "@/lib/party/service";
 import { notFound, redirect } from "next/navigation";
 

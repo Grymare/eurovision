@@ -91,39 +91,53 @@ export function PresentationCeremony({
   );
 
   const loadPresentation = useCallback(async () => {
-    setError(null);
+    const response = await fetch(`/api/parties/${partyCode}/presentation`);
+    const data = (await response.json()) as {
+      party: { state: string };
+      entries: SerializedEntry[];
+      presentation: PresentationHostView | null;
+      error?: string;
+    };
 
-    try {
-      const response = await fetch(`/api/parties/${partyCode}/presentation`);
-      const data = (await response.json()) as {
-        party: { state: string };
-        entries: SerializedEntry[];
-        presentation: PresentationHostView | null;
-        error?: string;
-      };
+    if (!response.ok) {
+      throw new Error(data.error ?? "Could not load presentation");
+    }
 
-      if (!response.ok) {
-        throw new Error(data.error ?? "Could not load presentation");
-      }
-
-      if (data.presentation) {
-        applyResponse({
-          party: data.party,
-          entries: data.entries,
-          presentation: data.presentation,
-        });
-      }
-    } catch (loadError) {
-      setError(loadError instanceof Error ? loadError.message : "Could not load presentation");
-    } finally {
-      setIsLoading(false);
+    if (data.presentation) {
+      applyResponse({
+        party: data.party,
+        entries: data.entries,
+        presentation: data.presentation,
+      });
     }
   }, [applyResponse, partyCode]);
 
   useEffect(() => {
-    if (!initialPresentation) {
-      void loadPresentation();
+    if (initialPresentation) {
+      return;
     }
+
+    let cancelled = false;
+
+    void (async () => {
+      try {
+        await loadPresentation();
+      } catch (loadError) {
+        if (!cancelled) {
+          setError(
+            loadError instanceof Error ? loadError.message : "Could not load presentation",
+          );
+        }
+      } finally {
+        if (!cancelled) {
+          setIsLoading(false);
+        }
+      }
+    })();
+
+    return () => {
+      cancelled = true;
+    };
   }, [initialPresentation, loadPresentation]);
 
   useEffect(() => {

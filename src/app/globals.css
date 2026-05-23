@@ -60,6 +60,11 @@
 }
 
 @theme inline {
+  /* Responsive breakpoints: 320px (xs) / 768px (md) / 1280px (xl) */
+  --breakpoint-xs: 20rem;
+  --breakpoint-md: 48rem;
+  --breakpoint-xl: 80rem;
+
   --color-stage: var(--stage);
   --color-stage-elevated: var(--stage-elevated);
   --color-stage-border: var(--stage-border);
@@ -80,6 +85,23 @@ body {
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
   background-color: var(--stage);
+  overflow-x: clip;
+  max-width: 100%;
+}
+
+@layer base {
+  a:focus-visible,
+  button:focus-visible,
+  input:focus-visible,
+  select:focus-visible,
+  textarea:focus-visible,
+  summary:focus-visible,
+  [role="button"]:focus-visible,
+  [role="combobox"]:focus-visible,
+  [role="option"]:focus-visible {
+    outline: 2px solid rgb(212 175 55 / 0.45);
+    outline-offset: 2px;
+  }
 }
 
 @layer components {
@@ -112,7 +134,7 @@ body {
   }
 
   .page-shell {
-    @apply relative z-[1] flex min-h-full flex-col text-foreground;
+    @apply relative z-[1] flex min-h-full max-w-full flex-col overflow-x-clip text-foreground;
   }
 
   .gold-ribbons {
@@ -133,7 +155,7 @@ body {
   }
 
   .site-logo {
-    @apply text-[0.62rem] font-medium uppercase tracking-[0.28em] text-muted transition-colors hover:text-foreground;
+    @apply inline-flex min-h-11 items-center text-[0.62rem] font-medium uppercase tracking-[0.28em] text-muted transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-light/40;
   }
 
   .site-nav {
@@ -142,7 +164,7 @@ body {
 
   .nav-link {
     position: relative;
-    @apply inline-flex items-center py-1 text-[0.62rem] font-medium uppercase tracking-[0.22em] text-muted transition-colors;
+    @apply inline-flex min-h-11 items-center px-1 py-2 text-[0.62rem] font-medium uppercase tracking-[0.22em] text-muted transition-colors;
   }
 
   .nav-link::after {
@@ -169,7 +191,7 @@ body {
   }
 
   .page-main {
-    @apply relative z-10 mx-auto flex w-full flex-1 flex-col px-4 py-10 sm:px-8 sm:py-14;
+    @apply relative z-10 mx-auto flex w-full max-w-full flex-1 flex-col overflow-x-clip px-4 py-10 sm:px-8 sm:py-14;
   }
 
   .section-stack {
@@ -237,7 +259,7 @@ body {
   }
 
   .field-input {
-    @apply w-full border border-stage-border/80 bg-transparent px-3 py-2.5 text-base text-foreground transition-colors placeholder:text-muted/70 focus-visible:border-gold-light/40 focus-visible:outline-none;
+    @apply min-h-11 w-full max-w-full border border-stage-border/80 bg-transparent px-3 py-2.5 text-base text-foreground transition-colors placeholder:text-muted/70 focus-visible:border-gold-light/40 focus-visible:outline-none;
   }
 
   .field-input:focus-visible {
@@ -289,6 +311,7 @@ body {
     align-items: center;
     justify-content: space-between;
     gap: 0.75rem;
+    min-height: 2.75rem;
     text-align: left;
   }
 
@@ -437,7 +460,7 @@ body {
   }
 
   .gold-code {
-    @apply font-mono text-5xl font-medium uppercase tracking-[0.28em] sm:text-6xl;
+    @apply min-w-0 max-w-full break-all font-mono text-4xl font-medium uppercase tracking-[0.16em] xs:text-5xl xs:tracking-[0.22em] sm:text-6xl sm:tracking-[0.28em];
     background-image: var(--gold-gradient-text);
     -webkit-background-clip: text;
     background-clip: text;
@@ -601,12 +624,45 @@ body {
   }
 
   .presentation-page-shell {
-    @apply relative z-10 mx-auto flex w-full max-w-none flex-1 flex-col px-4 py-4 sm:px-6;
+    @apply relative z-10 mx-auto flex w-full max-w-full flex-1 flex-col overflow-x-clip px-4 py-4 sm:px-6;
   }
 
   .presentation-page {
-    @apply mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4;
+    @apply mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 overflow-x-clip;
     min-height: 0;
+  }
+
+  @media (min-width: 48rem) and (orientation: landscape) {
+    .presentation-page {
+      @apply max-w-none gap-5;
+    }
+
+    .presentation-page__scoreboard {
+      @apply overflow-y-auto;
+      max-height: min(72vh, 52rem);
+    }
+
+    .ev-scoreboard {
+      @apply gap-4;
+    }
+  }
+
+  @media (min-width: 80rem) {
+    .presentation-page:fullscreen {
+      @apply px-12 py-10;
+    }
+
+    .presentation-page__jury-name {
+      @apply text-2xl;
+    }
+
+    .presentation-scoreboard__points {
+      @apply text-3xl;
+    }
+
+    .ev-scoreboard {
+      @apply gap-5;
+    }
   }
 
   .presentation-page:fullscreen {
