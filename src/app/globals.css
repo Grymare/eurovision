@@ -624,24 +624,14 @@ body {
   }
 
   .presentation-page-shell {
-    @apply relative z-10 mx-auto flex w-full max-w-full flex-1 flex-col overflow-x-clip px-4 py-4 sm:px-6;
+    @apply relative z-10 mx-auto flex w-full max-w-[75rem] flex-col overflow-x-clip px-4 py-4 sm:px-6;
   }
 
   .presentation-page {
-    @apply mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4 overflow-x-clip;
-    min-height: 0;
+    @apply mx-auto flex w-full flex-col gap-4 overflow-x-clip;
   }
 
   @media (min-width: 48rem) and (orientation: landscape) {
-    .presentation-page {
-      @apply max-w-none gap-5;
-    }
-
-    .presentation-page__scoreboard {
-      @apply overflow-y-auto;
-      max-height: min(72vh, 52rem);
-    }
-
     .ev-scoreboard {
       @apply gap-4;
     }
@@ -666,7 +656,7 @@ body {
   }
 
   .presentation-page:fullscreen {
-    @apply max-w-none justify-start bg-stage px-8 py-8;
+    @apply max-w-none justify-start overflow-y-auto bg-stage px-8 py-8;
   }
 
   .presentation-page__toolbar {
@@ -706,7 +696,7 @@ body {
   }
 
   .presentation-page__scoreboard {
-    @apply min-h-0 flex-1 overflow-y-auto;
+    @apply w-full;
   }
 
   .presentation-page__controls {
