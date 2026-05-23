@@ -1,7 +1,8 @@
 "use client";
 
 import { EntryPicker } from "@/components/entry-picker";
-import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
+import { VoteBallot } from "@/components/vote-ballot";
+import { MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
 import type { PartyOverviewResponse } from "@/lib/party/types";
 import { useCallback, useEffect, useState } from "react";
 
@@ -91,8 +92,8 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
     (data.party.state === "draft" || data.party.state === "lobby");
 
   return (
-    <div className="space-y-8">
-      <section className="panel space-y-6">
+    <>
+      <section className="section-block space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="space-y-3">
             <p className="eyebrow">Party code</p>
@@ -116,7 +117,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
 
           {data.viewer.isHost ? (
             <div className="flex min-w-[12rem] flex-col gap-3">
-              <button type="button" onClick={copyJoinLink} className="btn-secondary">
+              <button type="button" onClick={copyJoinLink} className="btn-primary">
                 Copy join link
               </button>
               <p className="break-all text-xs leading-5 text-muted">{joinUrl}</p>
@@ -126,8 +127,8 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
       </section>
 
       {data.viewer.isHost ? (
-        <section aria-labelledby="host-controls-heading" className="panel space-y-4">
-          <h2 id="host-controls-heading" className="display-serif text-2xl">
+        <section aria-labelledby="host-controls-heading" className="section-block space-y-4">
+          <h2 id="host-controls-heading" className="section-heading">
             Host controls
           </h2>
           <div className="flex flex-wrap gap-3">
@@ -136,7 +137,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
                 type="button"
                 disabled={isUpdating}
                 onClick={() => updateState("lobby")}
-                className="btn-secondary"
+                className="btn-primary"
               >
                 Open lobby
               </button>
@@ -144,7 +145,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
             {data.party.state === "lobby" ? (
               <button
                 type="button"
-                disabled={isUpdating || data.entries.length < MIN_PARTY_ENTRIES}
+                disabled={isUpdating || data.entries.length < MIN_BALLOT_ENTRIES}
                 onClick={() => updateState("voting_open")}
                 className="btn-primary"
               >
@@ -153,12 +154,25 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
             ) : null}
           </div>
           {data.party.state === "lobby" &&
-          data.entries.length < MIN_PARTY_ENTRIES ? (
+          data.entries.length < MIN_BALLOT_ENTRIES ? (
             <p className="text-sm text-muted">
-              Add {MIN_PARTY_ENTRIES - data.entries.length} more{" "}
-              {MIN_PARTY_ENTRIES - data.entries.length === 1 ? "country" : "countries"}.
+              Add {MIN_BALLOT_ENTRIES - data.entries.length} more{" "}
+              {MIN_BALLOT_ENTRIES - data.entries.length === 1 ? "country" : "countries"}{" "}
+              before voting (need {MIN_BALLOT_ENTRIES} for a full ballot).
             </p>
           ) : null}
+        </section>
+      ) : null}
+
+      {data.party.state === "voting_open" && data.viewer.participant ? (
+        <section className="section-block">
+          <VoteBallot
+            key={`${data.viewer.participant.id}-${data.viewer.participant.hasVoted}`}
+            partyId={partyId}
+            entries={data.entries}
+            initialVote={data.viewer.vote}
+            onSubmitted={refresh}
+          />
         </section>
       ) : null}
 
@@ -170,8 +184,8 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           onChange={refresh}
         />
       ) : (
-        <section className="panel">
-          <h2 className="display-serif text-2xl">Countries</h2>
+        <section className="section-block">
+          <h2 className="section-heading">Countries</h2>
           <ul className="mt-4">
             {data.entries.map((entry) => (
               <li key={entry.id} className="list-row">
@@ -185,8 +199,8 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
         </section>
       )}
 
-      <section aria-labelledby="participants-heading" className="panel">
-        <h2 id="participants-heading" className="display-serif text-2xl">
+      <section aria-labelledby="participants-heading" className="section-block">
+        <h2 id="participants-heading" className="section-heading">
           Jury
         </h2>
         <ul className="mt-2" aria-live="polite">
@@ -220,6 +234,6 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           {error}
         </p>
       ) : null}
-    </div>
+    </>
   );
 }

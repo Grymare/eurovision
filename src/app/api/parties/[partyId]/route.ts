@@ -3,7 +3,9 @@ import { toErrorResponse } from "@/lib/http/errors";
 import { isPartyState } from "@/lib/party/constants";
 import {
   getParticipantBySessionToken,
+  getParticipantVote,
   getPartyOverview,
+  parseVoteAllocations,
   requireHostParty,
   serializeEntry,
   serializeParticipant,
@@ -30,6 +32,14 @@ export async function GET(_request: Request, context: RouteContext) {
       Boolean(hostToken) &&
       overview.party.hostSessionToken === hostToken;
 
+    const viewerParticipant =
+      participant && participant.partyId === partyId ? participant : null;
+
+    const voteRecord =
+      viewerParticipant ?
+        await getParticipantVote(viewerParticipant.id, partyId)
+      : null;
+
     return NextResponse.json({
       party: serializeParty(overview.party),
       entries: overview.entries.map(serializeEntry),
@@ -37,9 +47,14 @@ export async function GET(_request: Request, context: RouteContext) {
       viewer: {
         isHost,
         participant:
-          participant && participant.partyId === partyId
-            ? serializeParticipant(participant)
-            : null,
+          viewerParticipant ? serializeParticipant(viewerParticipant) : null,
+        vote:
+          viewerParticipant ?
+            {
+              hasVoted: viewerParticipant.hasVoted,
+              allocations: voteRecord ? parseVoteAllocations(voteRecord) : null,
+            }
+          : null,
       },
     });
   } catch (error) {

@@ -2,6 +2,9 @@ export const PARTY_CODE_LENGTH = 6;
 
 export const MIN_PARTY_ENTRIES = 5;
 
+/** Each jury assigns 10 point slots — need at least this many countries to vote. */
+export const MIN_BALLOT_ENTRIES = 10;
+
 export const EUROVISION_POINT_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12] as const;
 
 export const PARTY_STATES = [

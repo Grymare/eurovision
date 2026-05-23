@@ -25,6 +25,11 @@ export type SerializedEntry = {
   sortOrder: number;
 };
 
+export type SerializedVote = {
+  hasVoted: boolean;
+  allocations: Record<string, number> | null;
+};
+
 export type PartyOverviewResponse = {
   party: SerializedParty;
   entries: SerializedEntry[];
@@ -32,5 +37,6 @@ export type PartyOverviewResponse = {
   viewer: {
     isHost: boolean;
     participant: SerializedParticipant | null;
+    vote: SerializedVote | null;
   };
 };

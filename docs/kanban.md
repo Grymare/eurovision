@@ -14,6 +14,7 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 | [EUP-004](tickets/EUP-004.md) | Party create & join | `mvp`, `feature` |
 | [EUP-006](tickets/EUP-006.md) | Party lobby & host dashboard | `mvp`, `feature` |
 | [EUP-006D](tickets/EUP-006D.md) | Design brainstorming session | `mvp`, `chore` |
+| [EUP-007](tickets/EUP-007.md) | Classic 12-point vote UI | `mvp`, `feature` |
 
 ## Review
 
@@ -29,14 +30,6 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 |----|-------|--------|
 | [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
 | [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
-| [EUP-007](tickets/EUP-007.md) | Classic 12-point vote UI | `mvp`, `feature` |
-
-## Backlog
-
-### MVP (Phase 1)
-
-| ID | Title | Labels |
-|----|-------|--------|
 | [EUP-008](tickets/EUP-008.md) | Vote storage & secrecy | `mvp`, `feature` |
 | [EUP-009](tickets/EUP-009.md) | Real-time voting status | `mvp`, `feature` |
 | [EUP-010](tickets/EUP-010.md) | Host voting controls | `mvp`, `feature` |

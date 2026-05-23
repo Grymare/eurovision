@@ -3,17 +3,20 @@ import {
   parties,
   partyEntries,
   participants,
+  votes,
   type Party,
   type PartyEntry,
   type Participant,
+  type VoteAllocations,
 } from "@/db/schema";
 import { AppError } from "@/lib/http/errors";
 import {
   canEditEntries,
   canJoinParty,
-  MIN_PARTY_ENTRIES,
+  MIN_BALLOT_ENTRIES,
   type PartyState,
 } from "@/lib/party/constants";
+import { validateVoteAllocations } from "@/lib/party/vote-validation";
 import { createId, createPartyCode, createSessionToken } from "@/lib/party/tokens";
 import { and, asc, count, eq, sql } from "drizzle-orm";
 
@@ -236,9 +239,9 @@ export async function updatePartyState(party: Party, nextState: PartyState) {
 
   if (nextState === "voting_open") {
     const entryCount = await countEntries(party.id);
-    if (entryCount < MIN_PARTY_ENTRIES) {
+    if (entryCount < MIN_BALLOT_ENTRIES) {
       throw new AppError(
-        `Add at least ${MIN_PARTY_ENTRIES} countries before opening voting`,
+        `Add at least ${MIN_BALLOT_ENTRIES} countries before opening voting`,
         409,
         "NOT_ENOUGH_ENTRIES",
       );
@@ -367,4 +370,81 @@ export async function getPartyOverview(partyId: string) {
     entries: entryList,
     participants: participantList,
   };
+}
+
+export async function requireParticipantForParty(
+  participantToken: string | null,
+  partyId: string,
+) {
+  if (!participantToken) {
+    throw new AppError("Participant authentication required", 401, "PARTICIPANT_AUTH_REQUIRED");
+  }
+
+  const participant = await getParticipantBySessionToken(participantToken);
+
+  if (!participant || participant.partyId !== partyId) {
+    throw new AppError("Participant access denied", 403, "PARTICIPANT_ACCESS_DENIED");
+  }
+
+  return participant;
+}
+
+export async function getParticipantVote(participantId: string, partyId: string) {
+  return db.query.votes.findFirst({
+    where: and(eq(votes.partyId, partyId), eq(votes.participantId, participantId)),
+  });
+}
+
+export async function submitParticipantVote(input: {
+  partyId: string;
+  participantId: string;
+  allocations: VoteAllocations;
+}) {
+  const party = await getPartyById(input.partyId);
+
+  if (!party) {
+    throw new AppError("Party not found", 404, "PARTY_NOT_FOUND");
+  }
+
+  if (party.state !== "voting_open") {
+    throw new AppError("Voting is not open", 409, "VOTING_CLOSED");
+  }
+
+  const entries = await listEntries(party.id);
+  const validationError = validateVoteAllocations(input.allocations, entries);
+
+  if (validationError) {
+    throw new AppError(validationError, 400, "INVALID_BALLOT");
+  }
+
+  const existing = await getParticipantVote(input.participantId, party.id);
+  const timestamp = nowIso();
+  const allocationsJson = JSON.stringify(input.allocations);
+
+  if (existing) {
+    db.update(votes)
+      .set({ allocationsJson, updatedAt: timestamp })
+      .where(eq(votes.id, existing.id))
+      .run();
+  } else {
+    db.insert(votes)
+      .values({
+        id: createId(),
+        partyId: party.id,
+        participantId: input.participantId,
+        allocationsJson,
+      })
+      .run();
+  }
+
+  db.update(participants)
+    .set({ hasVoted: true })
+    .where(eq(participants.id, input.participantId))
+    .run();
+
+  return getParticipantVote(input.participantId, party.id);
+}
+
+export function parseVoteAllocations(vote: { allocationsJson: string }): VoteAllocations {
+  return JSON.parse(vote.allocationsJson) as VoteAllocations;
 }
