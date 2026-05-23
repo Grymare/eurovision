@@ -50,9 +50,9 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
 
     try {
       await navigator.clipboard.writeText(joinUrl);
-      setMessage("Join link copied to clipboard.");
+      setMessage("Join link copied.");
     } catch {
-      setError("Could not copy link. You can copy it manually below.");
+      setError("Could not copy link. Copy the URL below manually.");
     }
   }
 
@@ -74,7 +74,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
       }
 
       await refresh();
-      setMessage(`Party is now: ${STATE_LABELS[nextState] ?? nextState}.`);
+      setMessage(`Now: ${STATE_LABELS[nextState] ?? nextState}.`);
     } catch (updateError) {
       setError(
         updateError instanceof Error
@@ -91,48 +91,46 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
     (data.party.state === "draft" || data.party.state === "lobby");
 
   return (
-    <div className="space-y-6">
-      <section className="panel panel-accent">
-        <div className="flex flex-wrap items-start justify-between gap-4 pt-1">
-          <div>
+    <div className="space-y-8">
+      <section className="panel space-y-6">
+        <div className="flex flex-wrap items-start justify-between gap-6">
+          <div className="space-y-3">
             <p className="eyebrow">Party code</p>
-            <p className="display-title mt-1 text-5xl tracking-[0.2em]">
-              {data.party.code}
-            </p>
-            <p className="mt-3 text-sm text-muted">
-              Status:{" "}
-              <strong className="text-foreground">
+            <p className="gold-code">{data.party.code}</p>
+            <p className="text-sm text-muted">
+              Status{" "}
+              <span className="text-foreground">
                 {STATE_LABELS[data.party.state] ?? data.party.state}
-              </strong>
+              </span>
             </p>
             {data.viewer.participant ? (
-              <p className="mt-1 text-sm text-muted">
-                You are logged in as{" "}
-                <strong className="text-foreground">
+              <p className="text-sm text-muted">
+                Signed in as{" "}
+                <span className="text-foreground">
                   {data.viewer.participant.nickname}
-                </strong>
-                {data.viewer.participant.isHost ? " (host)" : ""}.
+                </span>
+                {data.viewer.participant.isHost ? " · host" : ""}
               </p>
             ) : null}
           </div>
 
           {data.viewer.isHost ? (
-            <div className="flex flex-col gap-2">
-              <button type="button" onClick={copyJoinLink} className="btn-primary">
+            <div className="flex min-w-[12rem] flex-col gap-3">
+              <button type="button" onClick={copyJoinLink} className="btn-secondary">
                 Copy join link
               </button>
-              <p className="break-all text-xs text-muted">{joinUrl}</p>
+              <p className="break-all text-xs leading-5 text-muted">{joinUrl}</p>
             </div>
           ) : null}
         </div>
       </section>
 
       {data.viewer.isHost ? (
-        <section aria-labelledby="host-controls-heading" className="panel panel-accent space-y-3">
-          <h2 id="host-controls-heading" className="text-lg font-semibold">
+        <section aria-labelledby="host-controls-heading" className="panel space-y-4">
+          <h2 id="host-controls-heading" className="display-serif text-2xl">
             Host controls
           </h2>
-          <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-3">
             {data.party.state === "draft" ? (
               <button
                 type="button"
@@ -140,7 +138,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
                 onClick={() => updateState("lobby")}
                 className="btn-secondary"
               >
-                <span className="btn-label">Open lobby</span>
+                Open lobby
               </button>
             ) : null}
             {data.party.state === "lobby" ? (
@@ -158,8 +156,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           data.entries.length < MIN_PARTY_ENTRIES ? (
             <p className="text-sm text-muted">
               Add {MIN_PARTY_ENTRIES - data.entries.length} more{" "}
-              {MIN_PARTY_ENTRIES - data.entries.length === 1 ? "country" : "countries"}{" "}
-              to start voting.
+              {MIN_PARTY_ENTRIES - data.entries.length === 1 ? "country" : "countries"}.
             </p>
           ) : null}
         </section>
@@ -174,12 +171,14 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
         />
       ) : (
         <section className="panel">
-          <h2 className="text-lg font-semibold">Countries</h2>
-          <ul className="mt-3 space-y-2">
+          <h2 className="display-serif text-2xl">Countries</h2>
+          <ul className="mt-4">
             {data.entries.map((entry) => (
-              <li key={entry.id} className="flex items-center gap-2 text-base">
-                <span aria-hidden="true">{entry.flagEmoji}</span>
-                <span>{entry.name}</span>
+              <li key={entry.id} className="list-row">
+                <span className="flex items-center gap-3">
+                  <span aria-hidden="true">{entry.flagEmoji}</span>
+                  <span>{entry.name}</span>
+                </span>
               </li>
             ))}
           </ul>
@@ -187,24 +186,23 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
       )}
 
       <section aria-labelledby="participants-heading" className="panel">
-        <h2 id="participants-heading" className="text-lg font-semibold">
-          Participants
+        <h2 id="participants-heading" className="display-serif text-2xl">
+          Jury
         </h2>
-        <ul className="mt-3 space-y-2" aria-live="polite">
+        <ul className="mt-2" aria-live="polite">
           {data.participants.map((participant) => (
-            <li
-              key={participant.id}
-              className="flex items-center justify-between gap-3 rounded-md border border-stage-border bg-stage px-3 py-2"
-            >
-              <span>
+            <li key={participant.id} className="list-row">
+              <span className="text-foreground">
                 {participant.nickname}
-                {participant.isHost ? " (host)" : ""}
+                {participant.isHost ? (
+                  <span className="text-muted"> · host</span>
+                ) : null}
               </span>
               <span className="text-sm text-muted">
                 {participant.hasVoted ? (
                   <span className="text-success">Voted</span>
                 ) : (
-                  "Not voted yet"
+                  "Waiting"
                 )}
               </span>
             </li>
@@ -213,12 +211,12 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
       </section>
 
       {message ? (
-        <p role="status" className="text-sm text-success">
+        <p role="status" className="text-center text-sm text-success">
           {message}
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-sm text-danger">
+        <p role="alert" className="text-center text-sm text-danger">
           {error}
         </p>
       ) : null}

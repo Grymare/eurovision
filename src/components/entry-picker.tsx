@@ -77,31 +77,28 @@ export function EntryPicker({
   }
 
   return (
-    <section aria-labelledby="entries-heading" className="panel space-y-4">
-      <div className="flex flex-wrap items-end justify-between gap-2">
+    <section aria-labelledby="entries-heading" className="panel space-y-5">
+      <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="entries-heading" className="text-lg font-semibold">
+          <h2 id="entries-heading" className="display-serif text-2xl">
             Countries
           </h2>
           <p className="mt-1 text-sm text-muted">
-            Add at least {MIN_PARTY_ENTRIES} countries before opening voting.
+            At least {MIN_PARTY_ENTRIES} entries before voting opens.
           </p>
         </div>
-        <p className="text-sm font-medium gold-metallic-text">
-          {entries.length} / {MIN_PARTY_ENTRIES} minimum
+        <p className="text-sm text-muted">
+          <span className="text-foreground">{entries.length}</span> / {MIN_PARTY_ENTRIES}
         </p>
       </div>
 
       {entries.length === 0 ? (
-        <p className="text-sm text-muted">No countries yet.</p>
+        <p className="text-sm text-muted">No countries added yet.</p>
       ) : (
-        <ul className="divide-y divide-stage-border rounded-md border border-stage-border">
+        <ul>
           {entries.map((entry) => (
-            <li
-              key={entry.id}
-              className="flex items-center justify-between gap-3 px-3 py-2"
-            >
-              <span className="flex items-center gap-2 text-base">
+            <li key={entry.id} className="list-row">
+              <span className="flex items-center gap-3 text-base">
                 <span aria-hidden="true">{entry.flagEmoji}</span>
                 <span>{entry.name}</span>
               </span>
@@ -120,7 +117,7 @@ export function EntryPicker({
       )}
 
       {canEdit ? (
-        <form onSubmit={handleAdd} className="grid gap-3 sm:grid-cols-[1fr_auto_auto]">
+        <form onSubmit={handleAdd} className="grid gap-4 border-t border-stage-border pt-5 sm:grid-cols-[1fr_auto_auto]">
           <div className="space-y-2">
             <label htmlFor="entry-name" className="field-label">
               Country name
@@ -136,7 +133,7 @@ export function EntryPicker({
           </div>
           <div className="space-y-2">
             <label htmlFor="entry-flag" className="field-label">
-              Flag emoji
+              Flag
             </label>
             <input
               id="entry-flag"
@@ -145,16 +142,16 @@ export function EntryPicker({
               maxLength={8}
               value={flagEmoji}
               onChange={(event) => setFlagEmoji(event.target.value)}
-              className="field-input"
+              className="field-input sm:w-24"
             />
           </div>
           <div className="flex items-end">
             <button
               type="submit"
               disabled={isSubmitting}
-              className="btn-primary w-full sm:w-auto"
+              className="btn-secondary w-full sm:w-auto"
             >
-              Add country
+              Add
             </button>
           </div>
         </form>

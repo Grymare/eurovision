@@ -6,94 +6,67 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 
 | Decision | Choice |
 |----------|--------|
-| Mood | **TV broadcast** — black stage, gold spotlight, Eurovision night energy |
-| Color scheme | **Black / grey + gold** — neutral darks, no blue tint |
-| Default theme | **Dark** (no light mode in MVP; add toggle later if needed) |
-| Accent | **Metallic gold** — gradients and shine, not flat fills |
-| Presentation | **Fullscreen dark scoreboard** — huge type, minimal chrome, TV/projector first |
-| Motion | **Subtle** fades/slides; optional **gold sparkles** on 12-point reveals with `prefers-reduced-motion` fallback |
+| Mood | **Luxury minimal** — black stage, restrained gold, generous space |
+| Color scheme | **Black / charcoal + champagne gold** — no blue, no saturated yellow |
+| Typography | **Playfair Display** (headlines) + **Geist Sans** (UI body) |
+| Gold usage | **Sparingly** — party code, one hero accent, primary CTAs, thin borders |
+| Presentation | **Fullscreen dark scoreboard** — serif gold type, soft glow only |
+| Motion | **Subtle**; optional sparkle ring on 12-point reveals |
+
+Inspired by luxury black-and-gold UI: thin gradient borders, ghost buttons, matte backgrounds with soft radial light.
 
 ## Color palette
 
-| Token | Hex | Usage |
-|-------|-----|-------|
-| `--stage` | `#0A0A0A` | Page background (near-black) |
-| `--stage-elevated` | `#141414` | Cards, panels |
-| `--stage-border` | `#2E2E2E` | Borders, dividers |
-| `--foreground` | `#F5F5F5` | Primary text on dark surfaces |
-| `--muted` | `#A1A1AA` | Secondary text, hints (neutral grey) |
-| `--gold` | `#E8B923` | Primary buttons, key accents |
-| `--gold-bright` | `#FFD54F` | Highlights, 12-point emphasis |
-| `--gold-deep` | `#A67C00` | Borders on gold elements |
-| `--on-gold` | `#1A1408` | Text/icons on gold buttons |
-| `--success` | `#4ADE80` | Status confirmations |
-| `--danger` | `#F87171` | Errors, destructive actions |
+| Token | Hex / value | Usage |
+|-------|-------------|-------|
+| `--stage` | `#080808` | Page background |
+| `--stage-elevated` | `#101010` | Cards (semi-transparent) |
+| `--stage-border` | `gold @ 14% opacity` | Thin elegant borders |
+| `--foreground` | `#FAFAFA` | Primary text |
+| `--muted` | `#A3A3A3` | Secondary text |
+| `--gold-light` | `#D4AF37` | Focus rings, border highlights |
+| `--on-gold` | `#14110A` | Text on filled gold buttons |
 
-### Metallic gold (gradients)
+### Metallic gold (champagne gradients)
 
-Use gradients for hero accents — party codes, primary buttons, display type — not flat `#E8B923` blocks everywhere.
+Multi-stop **bronze → highlight → bronze** — never flat `#FFD54F`.
 
 | Token | Usage |
 |-------|--------|
-| `--gold-gradient-text` | Headlines, party code, secondary button labels |
-| `--gold-gradient-surface` | Primary buttons (with inset highlight + shine overlay) |
-| `--gold-gradient-border` | Secondary button rings, panel accent lines, sparkle burst |
-| `--gold-gradient-shine` | Specular highlight layer on primary buttons |
+| `--gold-gradient-text` | Party code, hero accent phrase only |
+| `--gold-gradient-surface` | Primary filled buttons (soft, not loud) |
+| `--gold-gradient-border` | Ghost button rings, panel edges |
+| `--gold-gradient-line` | Hero divider line |
 
-Utility classes: `.gold-metallic-text`, `.display-title`, `.btn-primary`, `.btn-secondary` (gradient border + label).
+### Where gold appears (intentional restraint)
 
-Solid `--gold` / `--gold-bright` remain for focus rings and small UI hints where gradients would be noisy.
-
-### Contrast checks (WCAG 2.2 AA)
-
-| Pair | Ratio | Pass |
-|------|-------|------|
-| `--foreground` on `--stage` | ~19:1 | AA / AAA |
-| `--muted` on `--stage` | ~7.5:1 | AA / AAA |
-| `--on-gold` on `--gold` | ~8.4:1 | AA / AAA |
-| `--gold-bright` on `--stage` (large text) | ~12:1 | AA large+ |
-| `--danger` on `--stage-elevated` | ~5.5:1 | AA |
+- Hero: **one phrase** in gradient gold; rest white serif
+- Party code: gradient serif
+- Primary button: soft metallic fill
+- Secondary button: **ghost** with thin gradient border, white text
+- Everything else: white or grey text
 
 ## Typography
 
-| Role | Font | Sizes |
-|------|------|-------|
-| UI body | Geist Sans | 16px base, 14px sm, 18px lg |
-| UI headings | Geist Sans semibold | H1 28–32px mobile, 36–40px desktop |
-| Presentation / scores | Bebas Neue | Points 72–120px TV; country 40–64px |
-| Monospace (codes) | Geist Mono | Party code, tabular data |
+| Role | Font |
+|------|------|
+| Headlines | Playfair Display (`.display-serif`, `.display-serif-gold`) |
+| Body / UI | Geist Sans |
+| Party code | Playfair + `.gold-code` |
+| Data / codes | Geist Mono |
 
-### Scale reference
+## Components
 
-- **Mobile voting UI:** 16px labels, 44px min touch targets
-- **Host dashboard:** same as mobile; wider layout on desktop
-- **Presentation fullscreen:** clamp typography — e.g. points `clamp(4rem, 12vw, 7.5rem)`
-
-## Layout patterns
-
-- **Phone:** single column, sticky primary action where helpful
-- **Desktop host:** max-width ~48rem content; host controls grouped in elevated panel
-- **Presentation:** true fullscreen route (`/party/[id]/present`) — black stage, centered reveal, scoreboard list below or overlay
+- **Panel:** thin gold-tinted border, dark glass background, generous padding
+- **Primary button:** pill, champagne gradient, dark text, minimal shadow
+- **Secondary button:** ghost pill, gradient border, white label
+- **Hero divider:** 1px horizontal gold gradient line
+- **Lists:** `.list-row` with bottom border only — no heavy boxes
 
 ## Motion
 
-| Interaction | Default | Reduced motion |
-|-------------|---------|----------------|
-| Page/panel enter | 200ms fade + 8px slide | Instant / opacity only |
-| Score reveal step | 300ms fade scale 0.98→1 | Instant swap |
-| 12-point moment | Optional gold sparkle burst (CSS) | Disabled — show static gold ring |
-| Live “who voted” | No animation on list reorder | Same |
-
-## Components (semantic)
-
-- **Primary button:** metallic gold gradient surface, dark `--on-gold` text, inset shine
-- **Secondary button:** gradient gold border + gradient label text
-- **Display / party code:** gradient text (`.display-title`, `.gold-metallic-text`)
-- **Cards:** neutral grey panels; optional `.panel-accent` gold gradient top edge
-- **Live region:** polite `aria-live` for vote status (no motion required)
-- **Flag + name:** always paired; never flag-only
+See prior motion table. Sparkle burst uses thin gradient ring, not thick glow.
 
 ## Brand notes
 
-- Fan project for `eurovision.grymare.com` — avoid official Eurovision logo assets
-- Word “Eurovision” in copy is fine; visual identity is **broadcast-inspired**, not official
+Fan project for `eurovision.grymare.com` — avoid official Eurovision logo assets.

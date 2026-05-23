@@ -1,5 +1,5 @@
 ﻿import type { Metadata } from "next";
-import { Bebas_Neue, Geist, Geist_Mono } from "next/font/google";
+import { Geist, Geist_Mono, Playfair_Display } from "next/font/google";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -12,9 +12,8 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const bebasNeue = Bebas_Neue({
-  variable: "--font-bebas-neue",
-  weight: "400",
+const playfair = Playfair_Display({
+  variable: "--font-playfair",
   subsets: ["latin"],
 });
 
@@ -31,13 +30,10 @@ export default function RootLayout({
   return (
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} ${bebasNeue.variable} h-full antialiased`}
+      className={`${geistSans.variable} ${geistMono.variable} ${playfair.variable} h-full antialiased`}
     >
       <body className="flex min-h-full flex-col">
-        <a
-          href="#main-content"
-          className="sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-md focus:bg-gold px-4 py-2 text-on-gold focus:shadow-lg"
-        >
+        <a href="#main-content" className="skip-link">
           Skip to main content
         </a>
         {children}

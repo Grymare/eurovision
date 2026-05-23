@@ -9,17 +9,17 @@ export default async function JoinPage({
 
   return (
     <div className="page-shell">
-      <main id="main-content" className="page-main max-w-xl">
-        <header className="space-y-2">
+      <main id="main-content" className="page-main max-w-md">
+        <header className="space-y-4">
           <p className="eyebrow">Join the jury</p>
-          <h1 className="text-3xl font-semibold tracking-tight">Join party</h1>
-          <p className="text-base text-muted">
-            You were invited to party code{" "}
-            <strong className="font-mono tracking-[0.2em] gold-metallic-text">
+          <h1 className="display-serif text-3xl">Enter the party</h1>
+          <p className="text-sm leading-6 text-muted">
+            Code{" "}
+            <span className="font-mono tracking-[0.25em] text-foreground">
               {code.toUpperCase()}
-            </strong>
-            .
+            </span>
           </p>
+          <hr className="hero-divider" aria-hidden="true" />
         </header>
         <JoinPartyForm initialCode={code.toUpperCase()} />
       </main>

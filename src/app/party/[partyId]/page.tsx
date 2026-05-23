@@ -43,11 +43,12 @@ export default async function PartyPage({
   return (
     <div className="page-shell">
       <main id="main-content" className="page-main max-w-3xl">
-        <header className="space-y-2">
+        <header className="space-y-3">
           <p className="eyebrow">Party lobby</p>
-          <h1 className="text-3xl font-semibold tracking-tight">
+          <h1 className="display-serif text-3xl sm:text-4xl">
             {party.title ?? "Eurovision party"}
           </h1>
+          <hr className="hero-divider" aria-hidden="true" />
         </header>
 
         <PartyLobby

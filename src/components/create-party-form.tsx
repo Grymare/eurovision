@@ -43,15 +43,15 @@ export function CreatePartyForm() {
   return (
     <form
       onSubmit={handleSubmit}
-      className="panel space-y-4"
+      className="panel space-y-5"
       aria-labelledby="create-party-heading"
     >
-      <div>
-        <h2 id="create-party-heading" className="text-lg font-semibold">
+      <div className="space-y-2">
+        <h2 id="create-party-heading" className="display-serif text-2xl">
           Host a party
         </h2>
-        <p className="mt-1 text-sm text-muted">
-          Create a new Eurovision-style voting party. You will vote too.
+        <p className="text-sm leading-6 text-muted">
+          You will join the jury too — same ballot as your guests.
         </p>
       </div>
 
@@ -74,13 +74,14 @@ export function CreatePartyForm() {
 
       <div className="space-y-2">
         <label htmlFor="party-title" className="field-label">
-          Party title (optional)
+          Party title <span className="text-muted">(optional)</span>
         </label>
         <input
           id="party-title"
           name="title"
           type="text"
           maxLength={80}
+          placeholder="Saturday night final"
           value={title}
           onChange={(event) => setTitle(event.target.value)}
           className="field-input"
@@ -94,7 +95,7 @@ export function CreatePartyForm() {
       ) : null}
 
       <button type="submit" disabled={isSubmitting} className="btn-primary">
-        {isSubmitting ? "Creating..." : "Create party"}
+        {isSubmitting ? "Creating…" : "Create party"}
       </button>
     </form>
   );

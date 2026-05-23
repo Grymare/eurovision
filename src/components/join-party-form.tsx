@@ -45,15 +45,15 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
   return (
     <form
       onSubmit={handleSubmit}
-      className="panel space-y-4"
+      className="panel space-y-5"
       aria-labelledby="join-party-heading"
     >
-      <div>
-        <h2 id="join-party-heading" className="text-lg font-semibold">
+      <div className="space-y-2">
+        <h2 id="join-party-heading" className="display-serif text-2xl">
           Join a party
         </h2>
-        <p className="mt-1 text-sm text-muted">
-          Enter the party code from your host and pick a unique nickname.
+        <p className="text-sm leading-6 text-muted">
+          Enter the code from your host and choose a unique nickname.
         </p>
       </div>
 
@@ -70,7 +70,7 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
           maxLength={8}
           value={code}
           onChange={(event) => setCode(event.target.value.toUpperCase())}
-          className="field-input font-mono uppercase tracking-[0.25em]"
+          className="field-input font-mono uppercase tracking-[0.3em]"
         />
       </div>
 
@@ -98,9 +98,7 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
       ) : null}
 
       <button type="submit" disabled={isSubmitting} className="btn-secondary">
-        <span className="btn-label">
-          {isSubmitting ? "Joining..." : "Join party"}
-        </span>
+        {isSubmitting ? "Joining…" : "Join party"}
       </button>
     </form>
   );

@@ -3,27 +3,25 @@
  */
 export const designTokens = {
   colors: {
-    stage: "#0A0A0A",
-    stageElevated: "#141414",
-    stageBorder: "#2E2E2E",
-    foreground: "#F5F5F5",
-    muted: "#A1A1AA",
-    gold: "#E8B923",
-    goldBright: "#FFD54F",
-    goldDeep: "#A67C00",
-    onGold: "#1A1408",
-    success: "#4ADE80",
-    danger: "#F87171",
+    stage: "#080808",
+    stageElevated: "#101010",
+    foreground: "#FAFAFA",
+    muted: "#A3A3A3",
+    goldLight: "#D4AF37",
+    goldMid: "#B38728",
+    goldDeep: "#8B6914",
+    onGold: "#14110A",
+    success: "#86EFAC",
+    danger: "#FCA5A5",
   },
-  gradients: {
-    text: "180deg: #fff9e6 → #ffd54f → #e8b923 → #fff3b0 → #c9a227",
-    surface: "165deg multi-stop bronze-gold highlight",
-    border: "135deg deep gold shimmer ring",
+  fonts: {
+    display: "Playfair Display",
+    body: "Geist Sans",
+    mono: "Geist Mono",
   },
   motion: {
     fast: "150ms",
     normal: "250ms",
-    slow: "350ms",
   },
   touchTargetMinPx: 44,
 } as const;

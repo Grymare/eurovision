@@ -3,58 +3,55 @@
 :root {
   color-scheme: dark;
 
-  --stage: #0a0a0a;
-  --stage-elevated: #141414;
-  --stage-border: #2e2e2e;
-  --foreground: #f5f5f5;
-  --muted: #a1a1aa;
-  --gold: #e8b923;
-  --gold-bright: #ffd54f;
-  --gold-deep: #a67c00;
-  --on-gold: #1a1408;
-  --success: #4ade80;
-  --danger: #f87171;
+  --stage: #080808;
+  --stage-elevated: #101010;
+  --stage-border: rgb(212 175 55 / 0.14);
+  --foreground: #fafafa;
+  --muted: #a3a3a3;
+  --gold-deep: #8b6914;
+  --gold-mid: #b38728;
+  --gold-light: #d4af37;
+  --gold-highlight: #f5e6c8;
+  --on-gold: #14110a;
+  --success: #86efac;
+  --danger: #fca5a5;
 
-  /* Metallic gold — multi-stop gradients (not flat fills) */
+  /* Champagne metallic — muted, not bright yellow */
   --gold-gradient-text: linear-gradient(
     180deg,
-    #fff9e6 0%,
-    #ffd54f 22%,
-    #e8b923 48%,
-    #fff3b0 68%,
-    #c9a227 100%
+    #f8edd4 0%,
+    #d4af37 38%,
+    #fbf0d0 52%,
+    #b38728 72%,
+    #9a7b2e 100%
   );
   --gold-gradient-surface: linear-gradient(
     165deg,
-    #6b4e0a 0%,
-    #a67c00 14%,
-    #e8b923 32%,
-    #ffe082 46%,
-    #ffd54f 52%,
-    #e8b923 64%,
-    #8f6b12 86%,
-    #5c4308 100%
+    #6b5418 0%,
+    #9a7b2e 22%,
+    #d4af37 42%,
+    #f0e0b0 50%,
+    #c9a227 62%,
+    #8b6914 100%
   );
   --gold-gradient-border: linear-gradient(
     135deg,
-    #5c4308 0%,
-    #c9a227 25%,
-    #fff3b0 50%,
-    #b8860b 75%,
-    #6b4e0a 100%
+    rgb(139 105 20 / 0.55) 0%,
+    rgb(212 175 55 / 0.95) 45%,
+    rgb(245 230 200 / 0.85) 50%,
+    rgb(179 135 40 / 0.9) 55%,
+    rgb(107 84 24 / 0.55) 100%
   );
-  --gold-gradient-shine: linear-gradient(
-    105deg,
+  --gold-gradient-line: linear-gradient(
+    90deg,
     transparent 0%,
-    transparent 38%,
-    rgb(255 255 255 / 0.28) 48%,
-    rgb(255 248 220 / 0.12) 52%,
-    transparent 62%,
+    rgb(212 175 55 / 0.15) 20%,
+    rgb(245 230 200 / 0.55) 50%,
+    rgb(212 175 55 / 0.15) 80%,
     transparent 100%
   );
 
   --background: var(--stage);
-  --foreground-color: var(--foreground);
 }
 
 @theme inline {
@@ -63,22 +60,33 @@
   --color-stage-border: var(--stage-border);
   --color-foreground: var(--foreground);
   --color-muted: var(--muted);
-  --color-gold: var(--gold);
-  --color-gold-bright: var(--gold-bright);
   --color-gold-deep: var(--gold-deep);
+  --color-gold-mid: var(--gold-mid);
+  --color-gold-light: var(--gold-light);
   --color-on-gold: var(--on-gold);
   --color-success: var(--success);
   --color-danger: var(--danger);
   --color-background: var(--background);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-  --font-display: var(--font-bebas-neue);
+  --font-display: var(--font-playfair);
 }
 
 body {
-  background: var(--stage);
   color: var(--foreground);
   font-family: var(--font-geist-sans), system-ui, sans-serif;
+  background-color: var(--stage);
+  background-image:
+    radial-gradient(
+      ellipse 90% 60% at 50% -30%,
+      rgb(212 175 55 / 0.05),
+      transparent 55%
+    ),
+    radial-gradient(
+      ellipse 50% 40% at 100% 100%,
+      rgb(255 255 255 / 0.02),
+      transparent 50%
+    );
 }
 
 @layer components {
@@ -90,94 +98,81 @@ body {
     color: transparent;
   }
 
-  .panel {
-    @apply rounded-xl border border-stage-border bg-stage-elevated p-4;
+  .page-shell {
+    @apply relative flex min-h-full flex-col text-foreground;
   }
 
-  .panel-accent {
-    position: relative;
+  .page-main {
+    @apply relative mx-auto flex w-full flex-1 flex-col gap-8 px-4 py-12 sm:px-8 sm:py-16;
   }
 
-  .panel-accent::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    left: 1rem;
-    right: 1rem;
-    height: 2px;
-    border-radius: 9999px;
-    background: var(--gold-gradient-border);
-    opacity: 0.85;
+  .hero-divider {
+    height: 1px;
+    width: min(100%, 12rem);
+    background: var(--gold-gradient-line);
+    border: 0;
   }
 
   .eyebrow {
-    @apply text-sm font-medium uppercase tracking-[0.2em];
+    @apply text-xs font-medium uppercase tracking-[0.35em] text-muted;
   }
 
-  .eyebrow.gold-metallic-text,
-  .eyebrow {
+  .display-serif {
+    font-family: var(--font-playfair), Georgia, serif;
+    @apply font-medium tracking-tight text-foreground;
+  }
+
+  .display-serif-gold {
+    font-family: var(--font-playfair), Georgia, serif;
+    @apply font-medium tracking-tight;
     background-image: var(--gold-gradient-text);
-    background-size: 100% 100%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
   }
 
-  .page-shell {
-    @apply flex min-h-full flex-col bg-stage text-foreground;
+  .panel {
+    @apply rounded-lg border border-stage-border bg-stage-elevated/80 p-5 backdrop-blur-sm sm:p-6;
   }
 
-  .page-main {
-    @apply mx-auto flex w-full flex-1 flex-col gap-6 px-4 py-10 sm:px-6;
+  .panel-quiet {
+    @apply rounded-lg border border-stage-border/60 bg-transparent p-4;
   }
 
   .field-label {
-    @apply block text-sm font-medium text-foreground;
+    @apply block text-sm font-medium tracking-wide text-foreground/90;
   }
 
   .field-input {
-    @apply w-full rounded-md border border-stage-border bg-stage px-3 py-2 text-base text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright;
+    @apply w-full rounded-md border border-stage-border bg-stage px-3 py-2.5 text-base text-foreground transition-colors placeholder:text-muted/70 focus-visible:border-gold-light/40 focus-visible:outline-none;
+    box-shadow: inset 0 1px 0 rgb(255 255 255 / 0.03);
   }
 
   .field-input:focus-visible {
-    box-shadow: 0 0 0 1px rgb(255 213 79 / 0.35);
+    box-shadow:
+      inset 0 1px 0 rgb(255 255 255 / 0.03),
+      0 0 0 1px rgb(212 175 55 / 0.22);
   }
 
   .btn-primary {
     position: relative;
     isolation: isolate;
-    overflow: hidden;
     background-image: var(--gold-gradient-surface);
     box-shadow:
-      inset 0 1px 0 rgb(255 255 255 / 0.35),
-      inset 0 -2px 0 rgb(0 0 0 / 0.2),
-      0 4px 16px rgb(0 0 0 / 0.45);
-    @apply inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold text-on-gold transition-[filter,transform] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright disabled:cursor-not-allowed disabled:opacity-60;
-  }
-
-  .btn-primary::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    background: var(--gold-gradient-shine);
-    opacity: 0.55;
-    pointer-events: none;
+      inset 0 1px 0 rgb(255 255 255 / 0.28),
+      0 1px 2px rgb(0 0 0 / 0.35);
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-6 py-2.5 text-sm font-medium tracking-wide text-on-gold transition-[filter,opacity] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-light/60 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-primary:hover:not(:disabled) {
-    filter: brightness(1.06);
-  }
-
-  .btn-primary:active:not(:disabled) {
-    filter: brightness(0.98);
-    transform: translateY(1px);
+    filter: brightness(1.04);
   }
 
   .btn-secondary {
     position: relative;
     isolation: isolate;
-    background: var(--stage-elevated);
-    @apply inline-flex min-h-11 items-center justify-center rounded-md px-4 py-2 text-sm font-semibold transition-[background-color,filter] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright disabled:cursor-not-allowed disabled:opacity-60;
+    background: transparent;
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-6 py-2.5 text-sm font-medium tracking-wide text-foreground transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-light/60 disabled:cursor-not-allowed disabled:opacity-50;
   }
 
   .btn-secondary::before {
@@ -187,6 +182,7 @@ body {
     padding: 1px;
     border-radius: inherit;
     background: var(--gold-gradient-border);
+    opacity: 0.75;
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
@@ -198,30 +194,37 @@ body {
     pointer-events: none;
   }
 
-  .btn-secondary .btn-label {
-    background-image: var(--gold-gradient-text);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
+  .btn-secondary:hover:not(:disabled) {
+    background: rgb(212 175 55 / 0.06);
   }
 
-  .btn-secondary:hover:not(:disabled) {
-    background: color-mix(in srgb, var(--stage-elevated) 88%, #ffd54f 12%);
+  .btn-ghost {
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2 text-sm font-medium tracking-wide text-muted transition-colors hover:text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-light/40;
   }
 
   .btn-danger {
-    @apply inline-flex min-h-11 items-center justify-center rounded-md px-3 text-sm font-medium text-danger hover:bg-stage focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger;
+    @apply inline-flex min-h-11 items-center justify-center rounded-full px-4 py-2 text-sm font-medium text-danger/90 transition-colors hover:bg-stage-elevated hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger/50;
   }
 
-  .display-title {
-    font-family: var(--font-bebas-neue), sans-serif;
-    @apply tracking-wide;
+  .gold-code {
+    font-family: var(--font-playfair), Georgia, serif;
+    @apply text-5xl font-medium tracking-[0.18em] sm:text-6xl;
     background-image: var(--gold-gradient-text);
-    background-size: 100% 120%;
     -webkit-background-clip: text;
     background-clip: text;
     color: transparent;
-    filter: drop-shadow(0 2px 8px rgb(0 0 0 / 0.45));
+    filter: drop-shadow(0 0 24px rgb(212 175 55 / 0.12));
+  }
+
+  .list-row {
+    @apply flex items-center justify-between gap-3 border-b border-stage-border py-3 last:border-b-0;
+  }
+
+  .skip-link {
+    @apply sr-only focus:not-sr-only focus:absolute focus:left-4 focus:top-4 focus:z-50 focus:rounded-full focus:px-4 focus:py-2 focus:text-sm focus:font-medium;
+    background: var(--stage-elevated);
+    border: 1px solid rgb(212 175 55 / 0.45);
+    color: var(--foreground);
   }
 
   .sparkle-burst {
@@ -231,10 +234,11 @@ body {
   .sparkle-burst::after {
     content: "";
     position: absolute;
-    inset: -0.5rem;
+    inset: -0.35rem;
     border-radius: 9999px;
-    padding: 2px;
+    padding: 1px;
     background: var(--gold-gradient-border);
+    opacity: 0;
     -webkit-mask:
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
@@ -243,22 +247,16 @@ body {
       linear-gradient(#fff 0 0) content-box,
       linear-gradient(#fff 0 0);
     mask-composite: exclude;
-    opacity: 0;
-    animation: sparkle-pulse 600ms ease-out;
+    animation: sparkle-pulse 700ms ease-out;
     pointer-events: none;
   }
 }
 
 @supports not (background-clip: text) {
   .gold-metallic-text,
-  .eyebrow,
-  .display-title {
-    color: var(--gold-bright);
-    background-image: none;
-  }
-
-  .btn-secondary .btn-label {
-    color: var(--gold-bright);
+  .display-serif-gold,
+  .gold-code {
+    color: var(--gold-light);
     background-image: none;
   }
 }
@@ -266,14 +264,14 @@ body {
 @keyframes sparkle-pulse {
   0% {
     opacity: 0;
-    transform: scale(0.85);
+    transform: scale(0.92);
   }
-  40% {
-    opacity: 1;
+  45% {
+    opacity: 0.85;
   }
   100% {
     opacity: 0;
-    transform: scale(1.15);
+    transform: scale(1.06);
   }
 }
 
@@ -281,10 +279,6 @@ body {
   .sparkle-burst::after {
     animation: none;
     opacity: 0;
-  }
-
-  .btn-primary:active:not(:disabled) {
-    transform: none;
   }
 
   *,
