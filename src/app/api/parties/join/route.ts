@@ -6,6 +6,7 @@ import {
   serializeParticipant,
   serializeParty,
 } from "@/lib/party/service";
+import { broadcastVotingStatus } from "@/lib/socket/party-broadcast";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -20,6 +21,7 @@ export async function POST(request: Request) {
     const result = await joinParty(body);
 
     await setParticipantSessionCookie(result.participantSessionToken);
+    await broadcastVotingStatus(result.party.id);
 
     return NextResponse.json({
       party: serializeParty(result.party),

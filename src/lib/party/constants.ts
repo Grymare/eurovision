@@ -32,3 +32,18 @@ export function canEditEntries(state: PartyState): boolean {
 export function canJoinParty(state: PartyState): boolean {
   return state === "lobby" || state === "voting_open";
 }
+
+export function joinPartyBlockedMessage(state: PartyState): string {
+  switch (state) {
+    case "draft":
+      return "The host hasn't opened the lobby yet.";
+    case "voting_closed":
+      return "Voting is closed — new guests can't join.";
+    case "presenting":
+      return "The presentation has started — new guests can't join.";
+    case "finished":
+      return "This party has finished.";
+    default:
+      return "You can't join this party right now.";
+  }
+}

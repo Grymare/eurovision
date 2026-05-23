@@ -7,6 +7,7 @@ import {
   serializeEntry,
   updateEntry,
 } from "@/lib/party/service";
+import { broadcastVotingStatus } from "@/lib/socket/party-broadcast";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -31,6 +32,8 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
     }
 
+    await broadcastVotingStatus(partyId);
+
     return NextResponse.json({ entry: serializeEntry(entry) });
   } catch (error) {
     return toErrorResponse(error);
@@ -43,6 +46,7 @@ export async function DELETE(_request: Request, context: RouteContext) {
     const hostToken = await getHostSessionToken();
     const party = await requireHostParty(hostToken, partyId);
     await deleteEntry(party, entryId);
+    await broadcastVotingStatus(partyId);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

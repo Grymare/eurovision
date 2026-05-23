@@ -3,6 +3,7 @@ import {
   getHostSessionToken,
   getParticipantSessionToken,
 } from "@/lib/auth/cookies";
+import { isDevMockDataEnabled } from "@/lib/dev/mock-data";
 import {
   getParticipantBySessionToken,
   getParticipantVote,
@@ -50,16 +51,16 @@ export default async function PartyPage({
 
   return (
     <main id="main-content" className="page-main section-stack max-w-3xl">
-      <header className="section-block space-y-4">
+      <header className="section-block section-block--head space-y-4">
         <p className="eyebrow">Party lobby</p>
         <h1 className="display-heading text-3xl sm:text-4xl">
           {party.title ?? "Eurovision party"}
         </h1>
-        <hr className="hero-divider" aria-hidden="true" />
       </header>
 
       <PartyLobby
         partyId={partyId}
+        devMockDataEnabled={isDevMockDataEnabled()}
         initialData={{
           party: serializeParty(party),
           entries: entries.map(serializeEntry),

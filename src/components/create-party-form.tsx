@@ -42,12 +42,13 @@ export function CreatePartyForm() {
 
   return (
     <form
+      id="host"
       onSubmit={handleSubmit}
-      className="panel space-y-5"
+      className="scroll-mt-28 space-y-5"
       aria-labelledby="create-party-heading"
     >
       <div className="space-y-2">
-        <h2 id="create-party-heading" className="display-serif text-2xl">
+        <h2 id="create-party-heading" className="section-heading">
           Host a party
         </h2>
         <p className="text-sm leading-6 text-muted">
@@ -74,7 +75,7 @@ export function CreatePartyForm() {
 
       <div className="space-y-2">
         <label htmlFor="party-title" className="field-label">
-          Party title <span className="text-muted">(optional)</span>
+          Party title <span className="normal-case tracking-normal text-muted">(optional)</span>
         </label>
         <input
           id="party-title"

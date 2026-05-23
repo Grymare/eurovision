@@ -13,9 +13,12 @@ import { AppError } from "@/lib/http/errors";
 import {
   canEditEntries,
   canJoinParty,
+  joinPartyBlockedMessage,
   MIN_BALLOT_ENTRIES,
   type PartyState,
 } from "@/lib/party/constants";
+import { EUROVISION_2026_ENTRY_SET, getMockEntrySet } from "@/lib/party/mock-data";
+import type { MockPartyEntry } from "@/lib/party/mock-data/types";
 import { validateVoteAllocations } from "@/lib/party/vote-validation";
 import { createId, createPartyCode, createSessionToken } from "@/lib/party/tokens";
 import { and, asc, count, eq, sql } from "drizzle-orm";
@@ -176,6 +179,36 @@ export async function createParty(input: {
   };
 }
 
+export async function createDevQuickStartParty(input: {
+  hostNickname: string;
+  title?: string;
+  mockSetId?: string;
+}) {
+  const result = await createParty(input);
+  let party = result.party;
+  const mockSetId = input.mockSetId ?? EUROVISION_2026_ENTRY_SET.id;
+
+  await seedMockEntries(party, mockSetId);
+
+  const lobbyParty = await updatePartyState(party, "lobby");
+  if (!lobbyParty) {
+    throw new AppError("Failed to open lobby", 500, "PARTY_STATE_UPDATE_FAILED");
+  }
+
+  party = lobbyParty;
+
+  const votingParty = await updatePartyState(party, "voting_open");
+  if (!votingParty) {
+    throw new AppError("Failed to open voting", 500, "PARTY_STATE_UPDATE_FAILED");
+  }
+
+  return {
+    ...result,
+    party: votingParty,
+    mockSetId,
+  };
+}
+
 export async function joinParty(input: { code: string; nickname: string }) {
   const party = await getPartyByCode(input.code.trim());
 
@@ -184,7 +217,7 @@ export async function joinParty(input: { code: string; nickname: string }) {
   }
 
   if (!canJoinParty(party.state)) {
-    throw new AppError("This party is no longer accepting guests", 409, "PARTY_CLOSED");
+    throw new AppError(joinPartyBlockedMessage(party.state), 409, "PARTY_CLOSED");
   }
 
   const nickname = input.nickname.trim();
@@ -304,6 +337,52 @@ export async function addEntry(
   return entry;
 }
 
+function normalizeEntryName(name: string) {
+  return name.trim().toLocaleLowerCase();
+}
+
+export async function seedMockEntries(
+  party: Party,
+  setId: string,
+  options: { skipExisting?: boolean } = {},
+) {
+  if (!canEditEntries(party.state)) {
+    throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
+  }
+
+  const mockSet = getMockEntrySet(setId);
+  if (!mockSet) {
+    throw new AppError("Unknown mock entry set", 400, "UNKNOWN_MOCK_ENTRY_SET");
+  }
+
+  const skipExisting = options.skipExisting ?? true;
+  const existingEntries = await listEntries(party.id);
+  const existingNames = new Set(existingEntries.map((entry) => normalizeEntryName(entry.name)));
+
+  const toAdd: MockPartyEntry[] = [];
+  for (const mockEntry of mockSet.entries) {
+    const normalizedName = normalizeEntryName(mockEntry.name);
+    if (skipExisting && existingNames.has(normalizedName)) {
+      continue;
+    }
+    toAdd.push(mockEntry);
+    existingNames.add(normalizedName);
+  }
+
+  const addedEntries = [];
+  for (const mockEntry of toAdd) {
+    addedEntries.push(await addEntry(party, mockEntry));
+  }
+
+  return {
+    setId: mockSet.id,
+    label: mockSet.label,
+    added: addedEntries.length,
+    skipped: mockSet.entries.length - addedEntries.length,
+    entries: await listEntries(party.id),
+  };
+}
+
 export async function updateEntry(
   party: Party,
   entryId: string,
@@ -389,10 +468,40 @@ export async function requireParticipantForParty(
   return participant;
 }
 
+export async function requirePartyViewer(
+  hostToken: string | null,
+  participantToken: string | null,
+  partyId: string,
+) {
+  if (hostToken) {
+    const party = await requireHostParty(hostToken, partyId);
+    return { party, participant: null, isHost: true as const };
+  }
+
+  const participant = await requireParticipantForParty(participantToken, partyId);
+  const party = await getPartyById(partyId);
+
+  if (!party) {
+    throw new AppError("Party not found", 404, "PARTY_NOT_FOUND");
+  }
+
+  return { party, participant, isHost: false as const };
+}
+
+export async function listPartyVotes(partyId: string) {
+  return db
+    .select()
+    .from(votes)
+    .where(eq(votes.partyId, partyId))
+    .all();
+}
+
 export async function getParticipantVote(participantId: string, partyId: string) {
-  return db.query.votes.findFirst({
-    where: and(eq(votes.partyId, partyId), eq(votes.participantId, participantId)),
-  });
+  return db
+    .select()
+    .from(votes)
+    .where(and(eq(votes.partyId, partyId), eq(votes.participantId, participantId)))
+    .get();
 }
 
 export async function submitParticipantVote(input: {
@@ -400,49 +509,85 @@ export async function submitParticipantVote(input: {
   participantId: string;
   allocations: VoteAllocations;
 }) {
-  const party = await getPartyById(input.partyId);
+  return db.transaction((tx) => {
+    const party = tx
+      .select()
+      .from(parties)
+      .where(eq(parties.id, input.partyId))
+      .get();
 
-  if (!party) {
-    throw new AppError("Party not found", 404, "PARTY_NOT_FOUND");
-  }
+    if (!party) {
+      throw new AppError("Party not found", 404, "PARTY_NOT_FOUND");
+    }
 
-  if (party.state !== "voting_open") {
-    throw new AppError("Voting is not open", 409, "VOTING_CLOSED");
-  }
+    if (party.state !== "voting_open") {
+      throw new AppError("Voting is not open", 409, "VOTING_CLOSED");
+    }
 
-  const entries = await listEntries(party.id);
-  const validationError = validateVoteAllocations(input.allocations, entries);
+    const participant = tx
+      .select()
+      .from(participants)
+      .where(
+        and(eq(participants.id, input.participantId), eq(participants.partyId, party.id)),
+      )
+      .get();
 
-  if (validationError) {
-    throw new AppError(validationError, 400, "INVALID_BALLOT");
-  }
+    if (!participant) {
+      throw new AppError("Participant not found", 404, "PARTICIPANT_NOT_FOUND");
+    }
 
-  const existing = await getParticipantVote(input.participantId, party.id);
-  const timestamp = nowIso();
-  const allocationsJson = JSON.stringify(input.allocations);
+    const entryRows = tx
+      .select()
+      .from(partyEntries)
+      .where(eq(partyEntries.partyId, party.id))
+      .all();
 
-  if (existing) {
-    db.update(votes)
-      .set({ allocationsJson, updatedAt: timestamp })
-      .where(eq(votes.id, existing.id))
+    const validationError = validateVoteAllocations(input.allocations, entryRows);
+
+    if (validationError) {
+      throw new AppError(validationError, 400, "INVALID_BALLOT");
+    }
+
+    const existing = tx
+      .select()
+      .from(votes)
+      .where(
+        and(eq(votes.partyId, party.id), eq(votes.participantId, input.participantId)),
+      )
+      .get();
+
+    const timestamp = nowIso();
+    const allocationsJson = JSON.stringify(input.allocations);
+
+    if (existing) {
+      tx.update(votes)
+        .set({ allocationsJson, updatedAt: timestamp })
+        .where(eq(votes.id, existing.id))
+        .run();
+    } else {
+      tx.insert(votes)
+        .values({
+          id: createId(),
+          partyId: party.id,
+          participantId: input.participantId,
+          allocationsJson,
+        })
+        .run();
+    }
+
+    tx.update(participants)
+      .set({ hasVoted: true })
+      .where(eq(participants.id, input.participantId))
       .run();
-  } else {
-    db.insert(votes)
-      .values({
-        id: createId(),
-        partyId: party.id,
-        participantId: input.participantId,
-        allocationsJson,
-      })
-      .run();
-  }
 
-  db.update(participants)
-    .set({ hasVoted: true })
-    .where(eq(participants.id, input.participantId))
-    .run();
-
-  return getParticipantVote(input.participantId, party.id);
+    return tx
+      .select()
+      .from(votes)
+      .where(
+        and(eq(votes.partyId, party.id), eq(votes.participantId, input.participantId)),
+      )
+      .get();
+  });
 }
 
 export function parseVoteAllocations(vote: { allocationsJson: string }): VoteAllocations {

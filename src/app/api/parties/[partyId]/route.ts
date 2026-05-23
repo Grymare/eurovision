@@ -12,6 +12,7 @@ import {
   serializeParty,
   updatePartyState,
 } from "@/lib/party/service";
+import { broadcastVotingStatus } from "@/lib/socket/party-broadcast";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
@@ -82,6 +83,8 @@ export async function PATCH(request: Request, context: RouteContext) {
     if (!updated) {
       return NextResponse.json({ error: "Party not found" }, { status: 404 });
     }
+
+    await broadcastVotingStatus(partyId);
 
     return NextResponse.json({ party: serializeParty(updated) });
   } catch (error) {

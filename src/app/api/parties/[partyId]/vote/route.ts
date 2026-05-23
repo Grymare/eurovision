@@ -6,6 +6,7 @@ import {
   requireParticipantForParty,
   submitParticipantVote,
 } from "@/lib/party/service";
+import { broadcastVoteSubmitted } from "@/lib/socket/party-broadcast";
 import type { VoteAllocations } from "@/db/schema";
 import { NextResponse } from "next/server";
 
@@ -53,6 +54,8 @@ export async function PUT(request: Request, context: RouteContext) {
     if (!vote) {
       return NextResponse.json({ error: "Failed to save vote" }, { status: 500 });
     }
+
+    await broadcastVoteSubmitted(partyId, participant.id, participant.nickname);
 
     return NextResponse.json({
       hasVoted: true,

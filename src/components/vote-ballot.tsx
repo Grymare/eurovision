@@ -1,6 +1,9 @@
 "use client";
 
+import { CountrySelect } from "@/components/country-select";
+import { CountryFlag } from "@/components/country-flag";
 import { MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
+import { buildDevBallotAllocations } from "@/lib/party/dev-ballot";
 import type { VoteAllocations } from "@/db/schema";
 import type { SerializedVote } from "@/lib/party/types";
 import {
@@ -14,7 +17,9 @@ type VoteBallotProps = {
   partyId: string;
   entries: SerializedEntry[];
   initialVote: SerializedVote | null;
-  onSubmitted?: () => void;
+  votingLocked?: boolean;
+  devMockDataEnabled?: boolean;
+  onSubmitted?: (vote: SerializedVote) => void;
 };
 
 type BallotMode = "waiting" | "confirm-edit" | "editing";
@@ -61,28 +66,65 @@ function initialSlots(vote: SerializedVote | null): Record<number, string> {
   return emptySlots();
 }
 
+function BallotSummary({
+  slots,
+  entries,
+}: {
+  slots: Record<number, string>;
+  entries: SerializedEntry[];
+}) {
+  const entryById = new Map(entries.map((entry) => [entry.id, entry]));
+
+  return (
+    <ol className="mt-4 space-y-2">
+      {[...BALLOT_POINT_ORDER].reverse().map((points) => {
+        const entryId = slots[points];
+        const entry = entryId ? entryById.get(entryId) : null;
+
+        if (!entry) {
+          return null;
+        }
+
+        return (
+          <li key={points} className="list-row">
+            <span className="flex min-w-[3rem] items-center gap-3">
+              <span className="text-sm font-semibold tracking-[0.18em] text-gold-light">
+                {points}
+              </span>
+              <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
+              <span>{entry.name}</span>
+            </span>
+          </li>
+        );
+      })}
+    </ol>
+  );
+}
+
 export function VoteBallot({
   partyId,
   entries,
   initialVote,
+  votingLocked = false,
+  devMockDataEnabled = false,
   onSubmitted,
 }: VoteBallotProps) {
   const [mode, setMode] = useState<BallotMode>(() => initialMode(initialVote));
   const [slots, setSlots] = useState(() => initialSlots(initialVote));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const hasSubmittedVote = Boolean(initialVote?.hasVoted);
+  const showWaitingView = mode === "waiting" || (votingLocked && hasSubmittedVote);
 
   function updateSlot(points: number, entryId: string) {
     setSlots((current) => ({ ...current, [points]: entryId }));
     setError(null);
   }
 
-  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
+  async function submitAllocations(allocations: VoteAllocations) {
     setIsSubmitting(true);
     setError(null);
 
-    const allocations = allocationsFromSlots(slots);
     const clientError = validateVoteAllocations(allocations, entries);
 
     if (clientError) {
@@ -103,8 +145,14 @@ export function VoteBallot({
         throw new Error(result.error ?? "Could not submit vote");
       }
 
+      const submittedVote: SerializedVote = {
+        hasVoted: true,
+        allocations: result.allocations,
+      };
+
+      setSlots(slotsFromAllocations(allocations));
       setMode("waiting");
-      onSubmitted?.();
+      onSubmitted?.(submittedVote);
     } catch (submitError) {
       setError(
         submitError instanceof Error ? submitError.message : "Could not submit vote",
@@ -112,6 +160,23 @@ export function VoteBallot({
     } finally {
       setIsSubmitting(false);
     }
+  }
+
+  async function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
+    event.preventDefault();
+    await submitAllocations(allocationsFromSlots(slots));
+  }
+
+  async function handleDevFillAndSubmit() {
+    const allocations = buildDevBallotAllocations(entries.map((entry) => entry.id));
+
+    if (!allocations) {
+      setError(`Need at least ${MIN_BALLOT_ENTRIES} countries for a dev ballot.`);
+      return;
+    }
+
+    setSlots(slotsFromAllocations(allocations));
+    await submitAllocations(allocations);
   }
 
   if (entries.length < MIN_BALLOT_ENTRIES) {
@@ -122,19 +187,33 @@ export function VoteBallot({
     );
   }
 
-  if (mode === "waiting") {
+  if (votingLocked && !hasSubmittedVote) {
+    return (
+      <p className="text-sm text-muted">Voting is closed.</p>
+    );
+  }
+
+  if (showWaitingView) {
     return (
       <div className="space-y-4">
-        <p role="status" className="text-sm text-success">
-          Your vote is in. Waiting for the rest of the jury.
-        </p>
-        <button
-          type="button"
-          className="btn-secondary"
-          onClick={() => setMode("confirm-edit")}
-        >
-          Edit my vote
-        </button>
+        <div className="space-y-2">
+          <h3 className="section-heading text-base">Your ballot</h3>
+          <p role="status" className="text-sm text-success">
+            {votingLocked ?
+              "Your vote is in. Ballots are locked."
+            : "Your vote is in. Waiting for the rest of the jury."}
+          </p>
+        </div>
+        <BallotSummary slots={slots} entries={entries} />
+        {!votingLocked ?
+          <button
+            type="button"
+            className="btn-secondary"
+            onClick={() => setMode("confirm-edit")}
+          >
+            Edit my vote
+          </button>
+        : null}
       </div>
     );
   }
@@ -188,24 +267,13 @@ export function VoteBallot({
                 <label htmlFor={`vote-${points}`} className="sr-only">
                   Country for {points} points
                 </label>
-                <select
+                <CountrySelect
                   id={`vote-${points}`}
-                  required
                   value={slots[points] ?? ""}
-                  onChange={(event) => updateSlot(points, event.target.value)}
-                  className="field-input min-h-11"
-                >
-                  <option value="">Select country</option>
-                  {entries.map((entry) => (
-                    <option
-                      key={entry.id}
-                      value={entry.id}
-                      disabled={selectedElsewhere.has(entry.id)}
-                    >
-                      {entry.flagEmoji} {entry.name}
-                    </option>
-                  ))}
-                </select>
+                  onChange={(entryId) => updateSlot(points, entryId)}
+                  entries={entries}
+                  disabledEntryIds={selectedElsewhere}
+                />
               </div>
             </li>
           );
@@ -218,9 +286,22 @@ export function VoteBallot({
         </p>
       ) : null}
 
-      <button type="submit" disabled={isSubmitting} className="btn-primary">
-        {isSubmitting ? "Submitting…" : "Submit vote"}
-      </button>
+      <div className="flex flex-wrap gap-3">
+        <button type="submit" disabled={isSubmitting} className="btn-primary">
+          {isSubmitting ? "Submitting…" : "Submit vote"}
+        </button>
+
+        {devMockDataEnabled ?
+          <button
+            type="button"
+            disabled={isSubmitting}
+            onClick={handleDevFillAndSubmit}
+            className="btn-secondary"
+          >
+            {isSubmitting ? "Submitting…" : "Dev: fill & submit ballot"}
+          </button>
+        : null}
+      </div>
     </form>
   );
 }

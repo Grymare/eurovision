@@ -44,12 +44,13 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
 
   return (
     <form
+      id="join"
       onSubmit={handleSubmit}
-      className="panel space-y-5"
+      className="section-block scroll-mt-28 space-y-5"
       aria-labelledby="join-party-heading"
     >
       <div className="space-y-2">
-        <h2 id="join-party-heading" className="display-serif text-2xl">
+        <h2 id="join-party-heading" className="section-heading">
           Join a party
         </h2>
         <p className="text-sm leading-6 text-muted">

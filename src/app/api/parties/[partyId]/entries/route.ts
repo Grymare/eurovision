@@ -7,6 +7,7 @@ import {
   requireHostParty,
   serializeEntry,
 } from "@/lib/party/service";
+import { broadcastVotingStatus } from "@/lib/socket/party-broadcast";
 import { NextResponse } from "next/server";
 import { z } from "zod";
 
@@ -39,6 +40,8 @@ export async function POST(request: Request, context: RouteContext) {
     const party = await requireHostParty(hostToken, partyId);
     const body = parseJsonBody(entrySchema, await request.json());
     const entry = await addEntry(party, body);
+
+    await broadcastVotingStatus(partyId);
 
     return NextResponse.json({ entry: serializeEntry(entry) }, { status: 201 });
   } catch (error) {

@@ -1,14 +1,22 @@
 "use client";
 
 import { EntryPicker } from "@/components/entry-picker";
+import { CountryFlag } from "@/components/country-flag";
 import { VoteBallot } from "@/components/vote-ballot";
+import { usePartySocket } from "@/hooks/use-party-socket";
 import { MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
 import type { PartyOverviewResponse } from "@/lib/party/types";
-import { useCallback, useEffect, useState } from "react";
+import type { SerializedVote } from "@/lib/party/types";
+import type {
+  VoteSubmittedPayload,
+  VotingStatusPayload,
+} from "@/lib/socket/party-events";
+import { useCallback, useState } from "react";
 
 type PartyLobbyProps = {
   partyId: string;
   initialData: PartyOverviewResponse;
+  devMockDataEnabled?: boolean;
 };
 
 const STATE_LABELS: Record<string, string> = {
@@ -20,7 +28,7 @@ const STATE_LABELS: Record<string, string> = {
   finished: "Finished",
 };
 
-export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
+export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }: PartyLobbyProps) {
   const [data, setData] = useState(initialData);
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
@@ -35,22 +43,91 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
     }
   }, [partyId]);
 
-  useEffect(() => {
-    const interval = setInterval(refresh, 5000);
-    return () => clearInterval(interval);
-  }, [refresh]);
+  const applyVotingStatus = useCallback((payload: VotingStatusPayload) => {
+    setData((prev) => {
+      const viewerParticipant =
+        prev.viewer.participant ?
+          payload.participants.find(
+            (participant) => participant.id === prev.viewer.participant!.id,
+          ) ?? prev.viewer.participant
+        : null;
 
-  const joinUrl =
-    typeof window !== "undefined"
-      ? `${window.location.origin}/join/${data.party.code}`
-      : `/join/${data.party.code}`;
+      return {
+        ...prev,
+        party: {
+          ...prev.party,
+          state: payload.party.state,
+          updatedAt: payload.party.updatedAt,
+        },
+        entries: payload.entries,
+        participants: payload.participants,
+        viewer: {
+          ...prev.viewer,
+          participant: viewerParticipant,
+          vote:
+            viewerParticipant && prev.viewer.vote ?
+              { ...prev.viewer.vote, hasVoted: viewerParticipant.hasVoted }
+            : prev.viewer.vote,
+        },
+      };
+    });
+  }, []);
+
+  const applyVoteSubmitted = useCallback((payload: VoteSubmittedPayload) => {
+    setData((prev) => ({
+      ...prev,
+      participants: prev.participants.map((participant) =>
+        participant.id === payload.participantId ?
+          { ...participant, hasVoted: true }
+        : participant,
+      ),
+      viewer: {
+        ...prev.viewer,
+        participant:
+          prev.viewer.participant?.id === payload.participantId ?
+            { ...prev.viewer.participant, hasVoted: true }
+          : prev.viewer.participant,
+      },
+    }));
+  }, []);
+
+  const handleVoteSubmitted = useCallback((vote: SerializedVote) => {
+    setData((prev) => {
+      const participantId = prev.viewer.participant?.id;
+
+      return {
+        ...prev,
+        participants: prev.participants.map((participant) =>
+          participant.id === participantId ?
+            { ...participant, hasVoted: true }
+          : participant,
+        ),
+        viewer: {
+          ...prev.viewer,
+          participant:
+            prev.viewer.participant ?
+              { ...prev.viewer.participant, hasVoted: true }
+            : null,
+          vote,
+        },
+      };
+    });
+  }, []);
+
+  usePartySocket({
+    partyId,
+    onVotingStatus: applyVotingStatus,
+    onVoteSubmitted: applyVoteSubmitted,
+  });
+
+  const joinPath = `/join/${data.party.code}`;
 
   async function copyJoinLink() {
     setError(null);
     setMessage(null);
 
     try {
-      await navigator.clipboard.writeText(joinUrl);
+      await navigator.clipboard.writeText(`${window.location.origin}${joinPath}`);
       setMessage("Join link copied.");
     } catch {
       setError("Could not copy link. Copy the URL below manually.");
@@ -91,13 +168,26 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
     data.viewer.isHost &&
     (data.party.state === "draft" || data.party.state === "lobby");
 
+  const showBallot =
+    data.viewer.participant &&
+    (data.party.state === "voting_open" || data.party.state === "voting_closed");
+  const votingLocked = data.party.state !== "voting_open";
+
   return (
     <>
       <section className="section-block space-y-6">
         <div className="flex flex-wrap items-start justify-between gap-6">
           <div className="space-y-3">
             <p className="eyebrow">Party code</p>
-            <p className="gold-code">{data.party.code}</p>
+            <p
+              className={
+                data.viewer.isHost ?
+                  "gold-code"
+                : "font-mono text-lg font-medium uppercase tracking-[0.18em] text-foreground sm:text-xl"
+              }
+            >
+              {data.party.code}
+            </p>
             <p className="text-sm text-muted">
               Status{" "}
               <span className="text-foreground">
@@ -120,7 +210,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
               <button type="button" onClick={copyJoinLink} className="btn-primary">
                 Copy join link
               </button>
-              <p className="break-all text-xs leading-5 text-muted">{joinUrl}</p>
+              <p className="break-all text-xs leading-5 text-muted">{joinPath}</p>
             </div>
           ) : null}
         </div>
@@ -152,6 +242,26 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
                 Start voting
               </button>
             ) : null}
+            {data.party.state === "voting_open" ? (
+              <button
+                type="button"
+                disabled={isUpdating}
+                onClick={() => updateState("voting_closed")}
+                className="btn-primary"
+              >
+                Close voting
+              </button>
+            ) : null}
+            {data.party.state === "voting_closed" ? (
+              <button
+                type="button"
+                disabled={isUpdating}
+                onClick={() => updateState("voting_open")}
+                className="btn-secondary"
+              >
+                Reopen voting
+              </button>
+            ) : null}
           </div>
           {data.party.state === "lobby" &&
           data.entries.length < MIN_BALLOT_ENTRIES ? (
@@ -164,14 +274,15 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
         </section>
       ) : null}
 
-      {data.party.state === "voting_open" && data.viewer.participant ? (
+      {showBallot ? (
         <section className="section-block">
           <VoteBallot
-            key={`${data.viewer.participant.id}-${data.viewer.participant.hasVoted}`}
             partyId={partyId}
             entries={data.entries}
             initialVote={data.viewer.vote}
-            onSubmitted={refresh}
+            votingLocked={votingLocked}
+            devMockDataEnabled={devMockDataEnabled}
+            onSubmitted={handleVoteSubmitted}
           />
         </section>
       ) : null}
@@ -181,6 +292,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           partyId={partyId}
           initialEntries={data.entries}
           canEdit={canEditEntries}
+          devMockDataEnabled={devMockDataEnabled}
           onChange={refresh}
         />
       ) : (
@@ -190,7 +302,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
             {data.entries.map((entry) => (
               <li key={entry.id} className="list-row">
                 <span className="flex items-center gap-3">
-                  <span aria-hidden="true">{entry.flagEmoji}</span>
+                  <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
                   <span>{entry.name}</span>
                 </span>
               </li>

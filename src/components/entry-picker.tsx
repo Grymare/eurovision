@@ -1,5 +1,6 @@
 "use client";
 
+import { CountryFlag } from "@/components/country-flag";
 import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import type { SerializedEntry } from "@/lib/party/types";
 import { useState } from "react";
@@ -8,6 +9,7 @@ type EntryPickerProps = {
   partyId: string;
   initialEntries: SerializedEntry[];
   canEdit: boolean;
+  devMockDataEnabled?: boolean;
   onChange?: () => void;
 };
 
@@ -15,21 +17,17 @@ export function EntryPicker({
   partyId,
   initialEntries,
   canEdit,
+  devMockDataEnabled = false,
   onChange,
 }: EntryPickerProps) {
-  const [entries, setEntries] = useState(initialEntries);
+  const entries = initialEntries;
   const [name, setName] = useState("");
   const [flagEmoji, setFlagEmoji] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  async function refreshEntries() {
-    const response = await fetch(`/api/parties/${partyId}/entries`);
-    const data = await response.json();
-    if (response.ok) {
-      setEntries(data.entries);
-    }
-  }
+  const [isSeeding, setIsSeeding] = useState(false);
+  const showEntryMinimumHint = canEdit;
+  const showEntryCount = entries.length < MIN_PARTY_ENTRIES;
 
   async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -50,12 +48,35 @@ export function EntryPicker({
 
       setName("");
       setFlagEmoji("");
-      await refreshEntries();
       onChange?.();
     } catch (addError) {
       setError(addError instanceof Error ? addError.message : "Could not add country");
     } finally {
       setIsSubmitting(false);
+    }
+  }
+
+  async function handleSeedMockEntries() {
+    setIsSeeding(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/parties/${partyId}/entries/seed-mock`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ setId: "eurovision-2026" }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not load mock countries");
+      }
+
+      onChange?.();
+    } catch (seedError) {
+      setError(seedError instanceof Error ? seedError.message : "Could not load mock countries");
+    } finally {
+      setIsSeeding(false);
     }
   }
 
@@ -72,24 +93,27 @@ export function EntryPicker({
       return;
     }
 
-    await refreshEntries();
     onChange?.();
   }
 
   return (
-    <section aria-labelledby="entries-heading" className="panel space-y-5">
+    <section aria-labelledby="entries-heading" className="section-block space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h2 id="entries-heading" className="display-serif text-2xl">
+          <h2 id="entries-heading" className="section-heading">
             Countries
           </h2>
-          <p className="mt-1 text-sm text-muted">
-            At least {MIN_PARTY_ENTRIES} entries before voting opens.
-          </p>
+          {showEntryMinimumHint ?
+            <p className="mt-1 text-sm text-muted">
+              At least {MIN_PARTY_ENTRIES} entries before voting opens.
+            </p>
+          : null}
         </div>
-        <p className="text-sm text-muted">
-          <span className="text-foreground">{entries.length}</span> / {MIN_PARTY_ENTRIES}
-        </p>
+        {showEntryCount ?
+          <p className="text-sm text-muted">
+            <span className="text-foreground">{entries.length}</span> / {MIN_PARTY_ENTRIES}
+          </p>
+        : null}
       </div>
 
       {entries.length === 0 ? (
@@ -99,7 +123,7 @@ export function EntryPicker({
           {entries.map((entry) => (
             <li key={entry.id} className="list-row">
               <span className="flex items-center gap-3 text-base">
-                <span aria-hidden="true">{entry.flagEmoji}</span>
+                <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
                 <span>{entry.name}</span>
               </span>
               {canEdit ? (
@@ -115,6 +139,22 @@ export function EntryPicker({
           ))}
         </ul>
       )}
+
+      {canEdit && devMockDataEnabled ? (
+        <div className="border-t border-stage-border pt-5">
+          <button
+            type="button"
+            onClick={handleSeedMockEntries}
+            disabled={isSeeding || isSubmitting}
+            className="btn-secondary"
+          >
+            {isSeeding ? "Loading…" : "Load Eurovision 2026 final countries (dev)"}
+          </button>
+          <p className="mt-2 text-xs text-muted">
+            Dev-only shortcut. Adds all 25 Vienna 2026 Grand Final countries; skips names already in the list.
+          </p>
+        </div>
+      ) : null}
 
       {canEdit ? (
         <form onSubmit={handleAdd} className="grid gap-4 border-t border-stage-border pt-5 sm:grid-cols-[1fr_auto_auto]">

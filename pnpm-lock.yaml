@@ -17,6 +17,9 @@ importers:
       clsx:
         specifier: ^2.1.1
         version: 2.1.1
+      country-flag-icons:
+        specifier: ^1.6.17
+        version: 1.6.17
       drizzle-orm:
         specifier: ^0.45.2
         version: 0.45.2(@types/better-sqlite3@7.6.13)(better-sqlite3@12.10.0)
@@ -1430,6 +1433,9 @@ packages:
   cors@2.8.6:
     resolution: {integrity: sha512-tJtZBBHA6vjIAaF6EnIaq6laBBP9aq/Y3ouVJjEfoHbRBcHBAHYcMh/w8LDrk2PvIMMq8gmopa5D4V8RmbrxGw==}
     engines: {node: '>= 0.10'}
+
+  country-flag-icons@1.6.17:
+    resolution: {integrity: sha512-Nmik0289ZVZSI3c7mJR/amg6DyY7Z59b0sTFSKayeX72mHfPzCPJygwJs2pYgQULzuAyWeCUgwAJ+Dq8OR+JFw==}
 
   cross-env@10.1.0:
     resolution: {integrity: sha512-GsYosgnACZTADcmEyJctkJIoqAhHjttw7RsFrVoJNXbsWWqaq6Ym+7kZjq6mS45O0jij6vtiReppKQEtqWy6Dw==}
@@ -3898,6 +3904,8 @@ snapshots:
     dependencies:
       object-assign: 4.1.1
       vary: 1.1.2
+
+  country-flag-icons@1.6.17: {}
 
   cross-env@10.1.0:
     dependencies:
