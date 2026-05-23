@@ -1,0 +1,16 @@
+# Cloudflare Tunnel config template for Grymare Eurovision.
+#
+# 1. Create a named tunnel in Cloudflare Zero Trust (Networks → Tunnels).
+# 2. Copy your tunnel UUID from the dashboard into `tunnel:` below.
+# 3. Place credentials JSON from Cloudflare at the path in `credentials-file`.
+# 4. Run: cloudflared tunnel --config deploy/cloudflared/config.yml run grymare-eurovision
+#
+# Do NOT commit credentials JSON or tunnel tokens to git.
+
+tunnel: YOUR_TUNNEL_UUID
+credentials-file: C:\Users\YOUR_USER\.cloudflared\YOUR_TUNNEL_UUID.json
+
+ingress:
+  - hostname: eurovision.grymare.com
+    service: http://localhost:3000
+  - service: http_status:404

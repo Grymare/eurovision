@@ -19,7 +19,7 @@ MVP specs for Grymare Eurovision. See [kanban](../kanban.md) for board status.
 | [EUP-013](EUP-013.md) | Presentation — final scoreboard | Backlog |
 | [EUP-014](EUP-014.md) | Host presentation controls | Backlog |
 | [EUP-015](EUP-015.md) | Real-time presentation sync | Backlog |
-| [EUP-016](EUP-016.md) | Docker LAN deployment | Backlog |
-| [EUP-017](EUP-017.md) | MVP smoke test checklist | Backlog |
+| [EUP-016](EUP-016.md) | Docker + Cloudflare Tunnel (PC) | Done |
+| [EUP-017](EUP-017.md) | MVP smoke test checklist | Done |
 
 Phase 2/3 tickets (EUP-020+) are listed on the [kanban board](../kanban.md) only.

@@ -23,6 +23,8 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 | [EUP-013](tickets/EUP-013.md) | Ceremony state machine v2 + host API | `mvp`, `feature` |
 | [EUP-014](tickets/EUP-014.md) | Jury intro + 1–10 reveals + reorder | `mvp`, `feature` |
 | [EUP-015](tickets/EUP-015.md) | 12-point reveal + winner finale | `mvp`, `feature` |
+| [EUP-016](tickets/EUP-016.md) | Docker + Cloudflare Tunnel (PC) | `mvp`, `infra` |
+| [EUP-017](tickets/EUP-017.md) | MVP smoke test checklist | `mvp`, `chore` |
 | [EUP-018](tickets/EUP-018.md) | Host-only presentation page | `mvp`, `feature` |
 | [EUP-019](tickets/EUP-019.md) | Eurovision dual-column scoreboard | `mvp`, `feature` |
 
@@ -40,8 +42,6 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 |----|-------|--------|
 | [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
 | [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
-| [EUP-016](tickets/EUP-016.md) | Docker LAN deployment | `mvp`, `infra` |
-| [EUP-017](tickets/EUP-017.md) | MVP smoke test checklist | `mvp`, `chore` |
 
 ### Phase 2
 
@@ -64,8 +64,8 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 |----|-------|--------|
 | EUP-030 | Raspberry Pi deployment guide | `phase-3`, `infra` |
 | EUP-031 | Caddy reverse proxy + HTTPS | `phase-3`, `infra` |
-| EUP-032 | Cloudflare DNS + Tunnel | `phase-3`, `infra` |
-| EUP-033 | DNS subdomain setup | `phase-3`, `infra` |
+| EUP-032 | Cloudflare DNS + Tunnel | `phase-3`, `infra` *(absorbed by EUP-016 for eurovision.grymare.com)* |
+| EUP-033 | DNS subdomain setup | `phase-3`, `infra` *(absorbed by EUP-016 for eurovision.grymare.com)* |
 | EUP-034 | Rate limiting & basic security | `phase-3`, `feature` |
 | EUP-035 | Advanced responsive polish | `phase-3`, `feature` |
 | EUP-036 | YouTube performance links | `phase-3`, `feature` |
