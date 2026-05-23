@@ -18,6 +18,8 @@ Socket.io uses same-origin `/api/socket` and works through Cloudflare Tunnel Web
 
 ## One-time Cloudflare setup
 
+### New tunnel (dashboard-managed)
+
 1. Open [Cloudflare Zero Trust](https://one.dash.cloudflare.com/) → **Networks** → **Tunnels**.
 2. **Create a tunnel** → choose **Cloudflared** → name it `grymare-eurovision`.
 3. Copy the install command / connector token (Cloudflare shows a `cloudflared service install …` or login step).
@@ -27,6 +29,33 @@ Socket.io uses same-origin `/api/socket` and works through Cloudflare Tunnel Web
    - **Service type:** HTTP
    - **URL:** `localhost:3000`
 5. Save. Cloudflare creates a proxied DNS record for `eurovision.grymare.com` (orange cloud).
+
+### Existing locally-managed tunnel (recommended if you already run `cloudflared`)
+
+If you already have a tunnel configured via `%USERPROFILE%\.cloudflared\config.yml` (e.g. `summarize.grymare.com`), **add a second ingress rule** instead of creating a new tunnel:
+
+```yaml
+ingress:
+  - hostname: summarize.grymare.com
+    service: http://localhost:5678
+  - hostname: eurovision.grymare.com
+    service: http://localhost:3000
+  - service: http_status:404
+```
+
+Then create DNS for the new hostname (once):
+
+```powershell
+cloudflared tunnel route dns <TUNNEL_UUID> eurovision.grymare.com
+```
+
+Restart the Cloudflared Windows service (Admin PowerShell):
+
+```powershell
+Restart-Service Cloudflared
+```
+
+Only one `cloudflared` service is needed — it can route multiple hostnames to different local ports.
 
 Optional: copy [`deploy/cloudflared/config.yml.example`](../../deploy/cloudflared/config.yml.example) to a local path outside the repo, fill in your tunnel UUID and credentials path, and run the tunnel from that file.
 
@@ -87,6 +116,7 @@ You do **not** need 24/7 uptime unless you want the site always available.
 | Problem | What to try |
 |---------|-------------|
 | Site unreachable | Tunnel connector running? Docker running? `docker ps` shows port 3000? |
+| Service already installed | Use existing locally-managed tunnel — add ingress in `%USERPROFILE%\.cloudflared\config.yml` instead of `service install` |
 | 502 / error page | App not ready yet — wait for build, check `docker compose logs` |
 | Socket.io disconnected | Refresh page; confirm WebSocket works on health page; restart tunnel + app |
 | Session lost after login | App must run with `NODE_ENV=production` in Docker (secure cookies require HTTPS) |

@@ -29,6 +29,10 @@ export function canEditEntries(state: PartyState): boolean {
   return state === "draft" || state === "lobby";
 }
 
+export function canRemoveParticipant(state: PartyState): boolean {
+  return state === "draft" || state === "lobby" || state === "voting_open";
+}
+
 export function canJoinParty(state: PartyState): boolean {
   return state === "lobby" || state === "voting_open";
 }

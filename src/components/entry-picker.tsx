@@ -1,8 +1,11 @@
 "use client";
 
+import { CountryAutocomplete } from "@/components/country-autocomplete";
 import { CountryFlag } from "@/components/country-flag";
+import { findCountryCatalogEntry } from "@/lib/countries/catalog";
 import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import type { SerializedEntry } from "@/lib/party/types";
+import { Trash2 } from "lucide-react";
 import { useState } from "react";
 
 type EntryPickerProps = {
@@ -22,7 +25,6 @@ export function EntryPicker({
 }: EntryPickerProps) {
   const entries = initialEntries;
   const [name, setName] = useState("");
-  const [flagEmoji, setFlagEmoji] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
@@ -34,11 +36,19 @@ export function EntryPicker({
     setIsSubmitting(true);
     setError(null);
 
+    const catalogEntry = findCountryCatalogEntry(name);
+
+    if (!catalogEntry) {
+      setError("Pick a country from the suggestions list.");
+      setIsSubmitting(false);
+      return;
+    }
+
     try {
       const response = await fetch(`/api/parties/${partyCode}/entries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, flagEmoji }),
+        body: JSON.stringify({ name: catalogEntry.name }),
       });
       const data = await response.json();
 
@@ -47,7 +57,6 @@ export function EntryPicker({
       }
 
       setName("");
-      setFlagEmoji("");
       onChange?.();
     } catch (addError) {
       setError(addError instanceof Error ? addError.message : "Could not add country");
@@ -126,21 +135,22 @@ export function EntryPicker({
                 <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
                 <span>{entry.name}</span>
               </span>
-              {canEdit ? (
+              {canEdit ?
                 <button
                   type="button"
                   onClick={() => handleDelete(entry.id)}
-                  className="btn-danger"
+                  className="btn-icon"
+                  aria-label={`Remove ${entry.name}`}
                 >
-                  Remove
+                  <Trash2 aria-hidden="true" className="h-4 w-4" />
                 </button>
-              ) : null}
+              : null}
             </li>
           ))}
         </ul>
       )}
 
-      {canEdit && devMockDataEnabled ? (
+      {canEdit && devMockDataEnabled ?
         <div className="border-t border-stage-border pt-5">
           <button
             type="button"
@@ -154,54 +164,41 @@ export function EntryPicker({
             Dev-only shortcut. Adds all 25 Vienna 2026 Grand Final countries; skips names already in the list.
           </p>
         </div>
-      ) : null}
+      : null}
 
-      {canEdit ? (
-        <form onSubmit={handleAdd} className="grid gap-4 border-t border-stage-border pt-5 sm:grid-cols-[1fr_auto_auto]">
+      {canEdit ?
+        <form
+          onSubmit={handleAdd}
+          className="grid gap-4 border-t border-stage-border pt-5 sm:grid-cols-[1fr_auto]"
+        >
           <div className="space-y-2">
             <label htmlFor="entry-name" className="field-label">
-              Country name
+              Add country
             </label>
-            <input
+            <CountryAutocomplete
               id="entry-name"
-              type="text"
-              required
               value={name}
-              onChange={(event) => setName(event.target.value)}
-              className="field-input"
-            />
-          </div>
-          <div className="space-y-2">
-            <label htmlFor="entry-flag" className="field-label">
-              Flag
-            </label>
-            <input
-              id="entry-flag"
-              type="text"
-              required
-              maxLength={8}
-              value={flagEmoji}
-              onChange={(event) => setFlagEmoji(event.target.value)}
-              className="field-input sm:w-24"
+              onChange={setName}
+              disabled={isSubmitting}
             />
           </div>
           <div className="flex items-end">
             <button
               type="submit"
-              disabled={isSubmitting}
+              disabled={isSubmitting || !findCountryCatalogEntry(name)}
               className="btn-secondary w-full sm:w-auto"
             >
               Add
             </button>
           </div>
         </form>
-      ) : null}
+      : null}
 
-      {error ? (
+      {error ?
         <p role="alert" className="text-sm text-danger">
           {error}
         </p>
-      ) : null}
+      : null}
     </section>
   );
 }

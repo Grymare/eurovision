@@ -14,6 +14,7 @@ import type { PresentationAction, PresentationHostView } from "@/lib/party/prese
 import { rankScoreboardEntries } from "@/lib/party/presentation";
 import { PRESENTATION_TIMING } from "@/lib/party/presentation-config";
 import type { SerializedEntry } from "@/lib/party/types";
+import Link from "next/link";
 import { useCallback, useEffect, useMemo, useRef, useState, type CSSProperties } from "react";
 import { flushSync } from "react-dom";
 
@@ -403,19 +404,24 @@ export function PresentationCeremony({
       </h1>
 
       <div className="presentation-page__toolbar">
-        {showJuryHeader && currentJury ?
-          <JuryHeader
-            key={currentJury.id}
-            nickname={currentJury.nickname}
-            isHost={currentJury.isHost}
-            juryNumber={juryNumber}
-            juryCount={juryCount}
-          />
-        : <div className="presentation-page__toolbar-main" />}
+        <div className="presentation-page__toolbar-main">
+          {showJuryHeader && currentJury ?
+            <JuryHeader
+              key={currentJury.id}
+              nickname={currentJury.nickname}
+              isHost={currentJury.isHost}
+              juryNumber={juryNumber}
+              juryCount={juryCount}
+            />
+          : null}
+        </div>
         <div className="presentation-page__toolbar-actions">
           <button type="button" className="btn-ghost" onClick={toggleFullscreen}>
             {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           </button>
+          <Link href={`/party/${partyCode}`} className="btn-secondary shrink-0">
+            Back to lobby
+          </Link>
         </div>
       </div>
 

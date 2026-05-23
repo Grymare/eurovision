@@ -14,7 +14,7 @@ import { z } from "zod";
 
 const entrySchema = z.object({
   name: z.string().trim().min(1).max(80),
-  flagEmoji: z.string().trim().min(1).max(8),
+  flagEmoji: z.string().trim().min(1).max(8).optional(),
 });
 
 type RouteContext = {

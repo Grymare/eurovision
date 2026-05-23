@@ -10,10 +10,12 @@ import {
   type Participant,
   type VoteAllocations,
 } from "@/db/schema";
+import { findCountryCatalogEntry } from "@/lib/countries/catalog";
 import { AppError } from "@/lib/http/errors";
 import {
   canEditEntries,
   canJoinParty,
+  canRemoveParticipant,
   joinPartyBlockedMessage,
   MIN_BALLOT_ENTRIES,
   type PartyState,
@@ -454,21 +456,26 @@ export async function updatePartyState(party: Party, nextState: PartyState) {
 
 export async function addEntry(
   party: Party,
-  input: { name: string; flagEmoji: string },
+  input: { name: string; flagEmoji?: string },
 ) {
   if (!canEditEntries(party.state)) {
     throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
   }
 
-  const name = input.name.trim();
-  const flagEmoji = input.flagEmoji.trim();
+  const catalogEntry = findCountryCatalogEntry(input.name);
 
-  if (!name) {
-    throw new AppError("Country name is required", 400, "INVALID_ENTRY_NAME");
+  if (!catalogEntry) {
+    throw new AppError("Pick a country from the suggestions list", 400, "UNKNOWN_COUNTRY");
   }
 
-  if (!flagEmoji) {
-    throw new AppError("Flag emoji is required", 400, "INVALID_ENTRY_FLAG");
+  const name = catalogEntry.name;
+  const flagEmoji = catalogEntry.flagEmoji;
+
+  const existingEntries = await listEntries(party.id);
+  const normalizedName = normalizeEntryName(name);
+
+  if (existingEntries.some((entry) => normalizeEntryName(entry.name) === normalizedName)) {
+    throw new AppError("That country is already in the list", 409, "ENTRY_ALREADY_EXISTS");
   }
 
   const [sortResult] = await db
@@ -592,6 +599,41 @@ export async function deleteEntry(party: Party, entryId: string) {
 
   if (result.changes === 0) {
     throw new AppError("Entry not found", 404, "ENTRY_NOT_FOUND");
+  }
+}
+
+export async function removeParticipant(party: Party, participantId: string) {
+  if (!canRemoveParticipant(party.state)) {
+    throw new AppError(
+      "Participants cannot be removed in the current party state",
+      409,
+      "PARTICIPANTS_LOCKED",
+    );
+  }
+
+  const participant = await db.query.participants.findFirst({
+    where: and(eq(participants.id, participantId), eq(participants.partyId, party.id)),
+  });
+
+  if (!participant) {
+    throw new AppError("Participant not found", 404, "PARTICIPANT_NOT_FOUND");
+  }
+
+  if (participant.isHost) {
+    throw new AppError("The host cannot be removed from the jury", 400, "CANNOT_REMOVE_HOST");
+  }
+
+  db.delete(votes)
+    .where(and(eq(votes.partyId, party.id), eq(votes.participantId, participantId)))
+    .run();
+
+  const result = db
+    .delete(participants)
+    .where(and(eq(participants.id, participantId), eq(participants.partyId, party.id)))
+    .run();
+
+  if (result.changes === 0) {
+    throw new AppError("Participant not found", 404, "PARTICIPANT_NOT_FOUND");
   }
 }
 

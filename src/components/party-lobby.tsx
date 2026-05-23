@@ -5,7 +5,7 @@ import { CountryFlag } from "@/components/country-flag";
 import { GuestFinalScoreboard } from "@/components/guest-final-scoreboard";
 import { VoteBallot } from "@/components/vote-ballot";
 import { usePartySocket } from "@/hooks/use-party-socket";
-import { MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
+import { canRemoveParticipant, MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
 import type { PartyOverviewResponse } from "@/lib/party/types";
 import type { SerializedVote } from "@/lib/party/types";
 import type {
@@ -13,6 +13,7 @@ import type {
   VotingStatusPayload,
 } from "@/lib/socket/party-events";
 import Link from "next/link";
+import { UserMinus } from "lucide-react";
 import { useCallback, useState } from "react";
 
 type PartyLobbyProps = {
@@ -36,6 +37,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
+  const [removingParticipantId, setRemovingParticipantId] = useState<string | null>(null);
 
   const refresh = useCallback(async () => {
     const response = await fetch(`/api/parties/${partyCode}`);
@@ -134,7 +136,43 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
       await navigator.clipboard.writeText(`${window.location.origin}${joinPath}`);
       setMessage("Join link copied.");
     } catch {
-      setError("Could not copy link. Copy the URL below manually.");
+      setError("Could not copy link.");
+    }
+  }
+
+  async function removeParticipant(participantId: string, nickname: string) {
+    const confirmed = window.confirm(
+      `Remove ${nickname} from the jury? They will lose access to this party.`,
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    setRemovingParticipantId(participantId);
+    setError(null);
+    setMessage(null);
+
+    try {
+      const response = await fetch(`/api/parties/${partyCode}/participants/${participantId}`, {
+        method: "DELETE",
+      });
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error ?? "Could not remove jury member");
+      }
+
+      await refresh();
+      setMessage(`${nickname} was removed from the jury.`);
+    } catch (removeError) {
+      setError(
+        removeError instanceof Error
+          ? removeError.message
+          : "Could not remove jury member",
+      );
+    } finally {
+      setRemovingParticipantId(null);
     }
   }
 
@@ -177,6 +215,9 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
     (data.party.state === "voting_open" || data.party.state === "voting_closed");
   const votingLocked = data.party.state !== "voting_open";
 
+  const canRemoveJuryMembers =
+    data.viewer.isHost && canRemoveParticipant(data.party.state);
+
   if (data.party.state === "presenting" && !data.viewer.isHost) {
     return (
       <section className="section-block space-y-4 text-center">
@@ -204,9 +245,9 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
   return (
     <>
       <section className="section-block space-y-6">
-        <div className="flex flex-wrap items-start justify-between gap-6">
-          <div className="space-y-3">
-            <p className="eyebrow">Party code</p>
+        <div className="space-y-3">
+          <p className="eyebrow">Party code</p>
+          <div className="flex items-center justify-between gap-4">
             <p
               className={
                 data.viewer.isHost ?
@@ -216,30 +257,26 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
             >
               {data.party.code}
             </p>
-            <p className="text-sm text-muted">
-              Status{" "}
-              <span className="text-foreground">
-                {STATE_LABELS[data.party.state] ?? data.party.state}
-              </span>
-            </p>
-            {data.viewer.participant ? (
-              <p className="text-sm text-muted">
-                Signed in as{" "}
-                <span className="text-foreground">
-                  {data.viewer.participant.nickname}
-                </span>
-                {data.viewer.participant.isHost ? " · host" : ""}
-              </p>
-            ) : null}
-          </div>
-
-          {data.viewer.isHost ? (
-            <div className="flex min-w-[12rem] flex-col gap-3">
-              <button type="button" onClick={copyJoinLink} className="btn-primary">
+            {data.viewer.isHost ?
+              <button type="button" onClick={copyJoinLink} className="btn-secondary shrink-0">
                 Copy join link
               </button>
-              <p className="break-all text-xs leading-5 text-muted">{joinPath}</p>
-            </div>
+            : null}
+          </div>
+          <p className="text-sm text-muted">
+            Status{" "}
+            <span className="text-foreground">
+              {STATE_LABELS[data.party.state] ?? data.party.state}
+            </span>
+          </p>
+          {data.viewer.participant ? (
+            <p className="text-sm text-muted">
+              Signed in as{" "}
+              <span className="text-foreground">
+                {data.viewer.participant.nickname}
+              </span>
+              {data.viewer.participant.isHost ? " · host" : ""}
+            </p>
           ) : null}
         </div>
       </section>
@@ -249,8 +286,8 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
           <h2 id="host-controls-heading" className="section-heading">
             Host controls
           </h2>
-          <div className="flex flex-wrap gap-3">
-            {data.party.state === "draft" ? (
+          <div className="flex flex-wrap items-center gap-3">
+            {data.party.state === "draft" ?
               <button
                 type="button"
                 disabled={isUpdating}
@@ -259,8 +296,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
               >
                 Open lobby
               </button>
-            ) : null}
-            {data.party.state === "lobby" ? (
+            : data.party.state === "lobby" ?
               <button
                 type="button"
                 disabled={isUpdating || data.entries.length < MIN_BALLOT_ENTRIES}
@@ -269,8 +305,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
               >
                 Start voting
               </button>
-            ) : null}
-            {data.party.state === "voting_open" ? (
+            : data.party.state === "voting_open" ?
               <button
                 type="button"
                 disabled={isUpdating}
@@ -279,8 +314,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
               >
                 Close voting
               </button>
-            ) : null}
-            {data.party.state === "voting_closed" ? (
+            : data.party.state === "voting_closed" ?
               <>
                 <Link href={presentationPath} className="btn-primary">
                   Open presentation
@@ -294,12 +328,11 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
                   Reopen voting
                 </button>
               </>
-            ) : null}
-            {data.party.state === "presenting" ? (
+            : data.party.state === "presenting" ?
               <Link href={presentationPath} className="btn-primary">
                 Return to presentation
               </Link>
-            ) : null}
+            : null}
           </div>
           {data.party.state === "lobby" &&
           data.entries.length < MIN_BALLOT_ENTRIES ? (
@@ -362,12 +395,25 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
                   <span className="text-muted"> · host</span>
                 ) : null}
               </span>
-              <span className="text-sm text-muted">
-                {participant.hasVoted ? (
-                  <span className="text-success">Voted</span>
-                ) : (
-                  "Waiting"
-                )}
+              <span className="flex items-center gap-3">
+                <span className="text-sm text-muted">
+                  {participant.hasVoted ? (
+                    <span className="text-success">Voted</span>
+                  ) : (
+                    "Waiting"
+                  )}
+                </span>
+                {canRemoveJuryMembers && !participant.isHost ?
+                  <button
+                    type="button"
+                    onClick={() => removeParticipant(participant.id, participant.nickname)}
+                    disabled={removingParticipantId === participant.id}
+                    className="btn-icon"
+                    aria-label={`Remove ${participant.nickname} from jury`}
+                  >
+                    <UserMinus aria-hidden="true" className="h-4 w-4" />
+                  </button>
+                : null}
               </span>
             </li>
           ))}
