@@ -2,7 +2,7 @@
 
 GitHub Projects-style board for Grymare Eurovision. Columns: **Backlog** → **Ready** → **In Progress** → **Review** → **Done**.
 
-Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
+Labels: `mvp`, `phase-2`, `phase-3`, `phase-4`, `infra`, `feature`, `chore`
 
 ## Done
 
@@ -55,24 +55,34 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 | EUP-025 | Party detail replay | `phase-2`, `feature` |
 | EUP-026 | Cross-party stats | `phase-2`, `feature` |
 | EUP-027 | Participant accounts linking | `phase-2`, `feature` |
-| EUP-028 | Spectator mode | `phase-2`, `feature` |
 
 ### Phase 3
 
 | ID | Title | Labels |
 |----|-------|--------|
 | EUP-030 | Raspberry Pi deployment guide | `phase-3`, `infra` |
-| EUP-031 | Caddy reverse proxy + HTTPS | `phase-3`, `infra` |
-| EUP-032 | Cloudflare DNS + Tunnel | `phase-3`, `infra` *(absorbed by EUP-016 for eurovision.grymare.com)* |
-| EUP-033 | DNS subdomain setup | `phase-3`, `infra` *(absorbed by EUP-016 for eurovision.grymare.com)* |
 | EUP-034 | Rate limiting & basic security | `phase-3`, `feature` |
 | EUP-035 | Advanced responsive polish | `phase-3`, `feature` |
-| EUP-036 | YouTube performance links | `phase-3`, `feature` |
-| EUP-037 | Embedded media player | `phase-3`, `feature` |
 | EUP-038 | Current-year quick entry tool | `phase-3`, `feature` |
-| EUP-039 | Export results | `phase-3`, `feature` |
-| EUP-040 | Jury profile avatars | `phase-3`, `feature` |
+
+### Phase 4
+
+| ID | Title | Labels |
+|----|-------|--------|
+| EUP-036 | YouTube performance links | `phase-4`, `feature` |
+| EUP-037 | Embedded media player | `phase-4`, `feature` |
+| EUP-039 | Export results | `phase-4`, `feature` |
+| EUP-040 | Jury profile avatars | `phase-4`, `feature` |
 
 ## Build order (MVP)
 
 EUP-001 → EUP-002 → EUP-003 → EUP-004 → EUP-006 → EUP-006D → EUP-007A/EUP-007B → EUP-007 → EUP-008 → EUP-009 → EUP-010 → EUP-011 → EUP-012 → EUP-018 → EUP-019 → EUP-013 → EUP-014 → EUP-015 → EUP-016 → EUP-017
+
+## Removed from backlog
+
+| ID | Reason |
+|----|--------|
+| EUP-028 | Spectator mode — out of scope; everyone who joins is a voter |
+| EUP-032 | Cloudflare Tunnel — delivered as part of EUP-016 |
+| EUP-033 | DNS subdomain — delivered as part of EUP-016 |
+| EUP-031 | Caddy reverse proxy + HTTPS — not needed; public access via Cloudflare Tunnel (EUP-016) |

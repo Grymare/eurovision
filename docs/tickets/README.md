@@ -22,4 +22,4 @@ MVP specs for Grymare Eurovision. See [kanban](../kanban.md) for board status.
 | [EUP-016](EUP-016.md) | Docker + Cloudflare Tunnel (PC) | Done |
 | [EUP-017](EUP-017.md) | MVP smoke test checklist | Done |
 
-Phase 2/3 tickets (EUP-020+) are listed on the [kanban board](../kanban.md) only.
+Phase 2/3/4 tickets (EUP-020+) are listed on the [kanban board](../kanban.md) only.
