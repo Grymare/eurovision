@@ -2,7 +2,7 @@
 
 GitHub Projects-style board for Grymare Eurovision. Columns: **Backlog** → **Ready** → **In Progress** → **Review** → **Done**.
 
-Labels: `mvp`, `phase-2`, `phase-3`, `phase-4`, `infra`, `feature`, `chore`
+Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`, `deferred`
 
 ## Done
 
@@ -46,33 +46,37 @@ Labels: `mvp`, `phase-2`, `phase-3`, `phase-4`, `infra`, `feature`, `chore`
 
 | ID | Title | Labels |
 |----|-------|--------|
-| EUP-005 | Optional account auth | `phase-2`, `feature` |
-| EUP-020 | Eurovision year JSON datasets | `phase-2`, `chore` |
-| EUP-021 | Import party from year | `phase-2`, `feature` |
-| EUP-022 | Auto-reveal presentation mode | `phase-2`, `feature` |
-| EUP-023 | Custom reveal order | `phase-2`, `feature` |
-| EUP-024 | Party history list | `phase-2`, `feature` |
-| EUP-025 | Party detail replay | `phase-2`, `feature` |
-| EUP-026 | Cross-party stats | `phase-2`, `feature` |
-| EUP-027 | Participant accounts linking | `phase-2`, `feature` |
+| [EUP-005](tickets/EUP-005.md) | Optional account auth | `phase-2`, `feature` |
+| [EUP-029](tickets/EUP-029.md) | Admin-only party creation | `phase-2`, `feature` |
+| [EUP-020](tickets/EUP-020.md) | Eurovision year JSON datasets | `phase-2`, `chore` |
+| [EUP-021](tickets/EUP-021.md) | Import party from year | `phase-2`, `feature` |
+| [EUP-024](tickets/EUP-024.md) | Party history list | `phase-2`, `feature` |
+| [EUP-025](tickets/EUP-025.md) | Party detail replay | `phase-2`, `feature` |
+| [EUP-026](tickets/EUP-026.md) | Cross-party stats | `phase-2`, `feature` |
+
+**Build order:** EUP-005 + EUP-029 → EUP-020 + EUP-021 → EUP-024 + EUP-025 + EUP-026
 
 ### Phase 3
 
 | ID | Title | Labels |
 |----|-------|--------|
-| EUP-030 | Raspberry Pi deployment guide | `phase-3`, `infra` |
-| EUP-034 | Rate limiting & basic security | `phase-3`, `feature` |
-| EUP-035 | Advanced responsive polish | `phase-3`, `feature` |
-| EUP-038 | Current-year quick entry tool | `phase-3`, `feature` |
+| [EUP-030](tickets/EUP-030.md) | Raspberry Pi deployment guide | `phase-3`, `infra` |
+| [EUP-034](tickets/EUP-034.md) | Rate limiting & basic security | `phase-3`, `feature` |
+| [EUP-035](tickets/EUP-035.md) | Advanced responsive polish | `phase-3`, `feature` |
+| [EUP-038](tickets/EUP-038.md) | Current-year quick entry tool | `phase-3`, `feature` |
 
-### Phase 4
+## Won't do (for now)
 
-| ID | Title | Labels |
-|----|-------|--------|
-| EUP-036 | YouTube performance links | `phase-4`, `feature` |
-| EUP-037 | Embedded media player | `phase-4`, `feature` |
-| EUP-039 | Export results | `phase-4`, `feature` |
-| EUP-040 | Jury profile avatars | `phase-4`, `feature` |
+Not planned for the foreseeable future. Specs kept for reference.
+
+| ID | Title | Notes |
+|----|-------|-------|
+| [EUP-022](tickets/EUP-022.md) | Auto-reveal presentation mode | Manual host clicks are enough |
+| [EUP-023](tickets/EUP-023.md) | Custom reveal order | Random jury order is enough |
+| [EUP-036](tickets/EUP-036.md) | YouTube performance links | Media skipped |
+| [EUP-037](tickets/EUP-037.md) | Embedded media player | Media skipped |
+| [EUP-039](tickets/EUP-039.md) | Export results | Use in-app replay instead |
+| [EUP-040](tickets/EUP-040.md) | Jury profile avatars | Nicknames sufficient |
 
 ## Build order (MVP)
 
@@ -82,6 +86,7 @@ EUP-001 → EUP-002 → EUP-003 → EUP-004 → EUP-006 → EUP-006D → EUP-007
 
 | ID | Reason |
 |----|--------|
+| EUP-027 | Absorbed into EUP-005 (account linking) |
 | EUP-028 | Spectator mode — out of scope; everyone who joins is a voter |
 | EUP-032 | Cloudflare Tunnel — delivered as part of EUP-016 |
 | EUP-033 | DNS subdomain — delivered as part of EUP-016 |

@@ -2,24 +2,48 @@
 
 MVP specs for Grymare Eurovision. See [kanban](../kanban.md) for board status.
 
-| ID | Title | Status |
-|----|-------|--------|
-| [EUP-001](EUP-001.md) | Project scaffold | Done |
-| [EUP-002](EUP-002.md) | Database schema | Ready |
-| [EUP-003](EUP-003.md) | Country entry picker (custom) | Backlog |
-| [EUP-004](EUP-004.md) | Party create & join | Backlog |
-| [EUP-005](EUP-005.md) | Optional account auth (Phase 2) | Backlog |
-| [EUP-006](EUP-006.md) | Party lobby & host dashboard | Backlog |
-| [EUP-007](EUP-007.md) | Classic 12-point vote UI | Backlog |
-| [EUP-008](EUP-008.md) | Vote storage & secrecy | Backlog |
-| [EUP-009](EUP-009.md) | Real-time voting status | Backlog |
-| [EUP-010](EUP-010.md) | Host voting controls | Backlog |
-| [EUP-011](EUP-011.md) | Score aggregation service | Backlog |
-| [EUP-012](EUP-012.md) | Presentation — ceremony mode | Backlog |
-| [EUP-013](EUP-013.md) | Presentation — final scoreboard | Backlog |
-| [EUP-014](EUP-014.md) | Host presentation controls | Backlog |
-| [EUP-015](EUP-015.md) | Real-time presentation sync | Backlog |
-| [EUP-016](EUP-016.md) | Docker + Cloudflare Tunnel (PC) | Done |
-| [EUP-017](EUP-017.md) | MVP smoke test checklist | Done |
+## MVP (done)
 
-Phase 2/3/4 tickets (EUP-020+) are listed on the [kanban board](../kanban.md) only.
+| ID | Title |
+|----|-------|
+| [EUP-001](EUP-001.md) – [EUP-019](EUP-019.md), [EUP-007A](EUP-007A.md), [EUP-007B](EUP-007B.md) | See kanban Done column |
+
+## Phase 2 (active backlog)
+
+| ID | Title |
+|----|-------|
+| [EUP-005](EUP-005.md) | Optional account auth |
+| [EUP-029](EUP-029.md) | Admin-only party creation |
+| [EUP-020](EUP-020.md) | Eurovision year JSON datasets |
+| [EUP-021](EUP-021.md) | Import party from year |
+| [EUP-024](EUP-024.md) | Party history list |
+| [EUP-025](EUP-025.md) | Party detail replay |
+| [EUP-026](EUP-026.md) | Cross-party stats |
+
+## Phase 3 (active backlog)
+
+| ID | Title |
+|----|-------|
+| [EUP-030](EUP-030.md) | Raspberry Pi deployment guide |
+| [EUP-034](EUP-034.md) | Rate limiting & basic security |
+| [EUP-035](EUP-035.md) | Advanced responsive polish |
+| [EUP-038](EUP-038.md) | Current-year quick entry tool |
+
+## Won't do (for now)
+
+| ID | Title |
+|----|-------|
+| [EUP-022](EUP-022.md) | Auto-reveal presentation mode |
+| [EUP-023](EUP-023.md) | Custom reveal order |
+| [EUP-036](EUP-036.md) | YouTube performance links |
+| [EUP-037](EUP-037.md) | Embedded media player |
+| [EUP-039](EUP-039.md) | Export results |
+| [EUP-040](EUP-040.md) | Jury profile avatars |
+
+## Removed / absorbed
+
+| ID | Title |
+|----|-------|
+| [EUP-027](EUP-027.md) | Participant accounts linking → merged into EUP-005 |
+
+Full board: [kanban.md](../kanban.md)
