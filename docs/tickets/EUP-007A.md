@@ -26,3 +26,4 @@ Mobile-first responsive layouts and touch targets before vote UI styling.
 - `min-h-11` (44px) on buttons, inputs, nav links, and combobox triggers
 - `overflow-x: clip` on body, page shell, and main content areas
 - Presentation scoreboard landscape + XL TV sizing in media queries
+- Presentation ceremony capped at `max-w-[75rem]` (1200px), centered; page scrolls as a whole when needed (no inner list scrollbar)
