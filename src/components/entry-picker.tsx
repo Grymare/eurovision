@@ -6,7 +6,7 @@ import type { SerializedEntry } from "@/lib/party/types";
 import { useState } from "react";
 
 type EntryPickerProps = {
-  partyId: string;
+  partyCode: string;
   initialEntries: SerializedEntry[];
   canEdit: boolean;
   devMockDataEnabled?: boolean;
@@ -14,7 +14,7 @@ type EntryPickerProps = {
 };
 
 export function EntryPicker({
-  partyId,
+  partyCode,
   initialEntries,
   canEdit,
   devMockDataEnabled = false,
@@ -35,7 +35,7 @@ export function EntryPicker({
     setError(null);
 
     try {
-      const response = await fetch(`/api/parties/${partyId}/entries`, {
+      const response = await fetch(`/api/parties/${partyCode}/entries`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, flagEmoji }),
@@ -61,7 +61,7 @@ export function EntryPicker({
     setError(null);
 
     try {
-      const response = await fetch(`/api/parties/${partyId}/entries/seed-mock`, {
+      const response = await fetch(`/api/parties/${partyCode}/entries/seed-mock`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ setId: "eurovision-2026" }),
@@ -83,7 +83,7 @@ export function EntryPicker({
   async function handleDelete(entryId: string) {
     setError(null);
 
-    const response = await fetch(`/api/parties/${partyId}/entries/${entryId}`, {
+    const response = await fetch(`/api/parties/${partyCode}/entries/${entryId}`, {
       method: "DELETE",
     });
     const data = await response.json();

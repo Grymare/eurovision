@@ -2,9 +2,7 @@
 import next from "next";
 import { Server } from "socket.io";
 import { getPartyById } from "@/lib/party/service";
-import {
-  emitVotingStatusToSocket,
-} from "@/lib/socket/party-broadcast";
+import { emitVotingStatusToSocket } from "@/lib/socket/party-broadcast";
 import {
   CLIENT_EVENTS,
   partyRoomId,

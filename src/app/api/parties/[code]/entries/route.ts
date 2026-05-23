@@ -5,6 +5,7 @@ import {
   addEntry,
   listEntries,
   requireHostParty,
+  resolvePartyRef,
   serializeEntry,
 } from "@/lib/party/service";
 import { broadcastVotingStatus } from "@/lib/socket/party-broadcast";
@@ -17,13 +18,14 @@ const entrySchema = z.object({
 });
 
 type RouteContext = {
-  params: Promise<{ partyId: string }>;
+  params: Promise<{ code: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { partyId } = await context.params;
-    const entries = await listEntries(partyId);
+    const { code } = await context.params;
+    const party = await resolvePartyRef(code);
+    const entries = await listEntries(party.id);
 
     return NextResponse.json({
       entries: entries.map(serializeEntry),
@@ -35,13 +37,13 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function POST(request: Request, context: RouteContext) {
   try {
-    const { partyId } = await context.params;
+    const { code } = await context.params;
     const hostToken = await getHostSessionToken();
-    const party = await requireHostParty(hostToken, partyId);
+    const party = await requireHostParty(hostToken, code);
     const body = parseJsonBody(entrySchema, await request.json());
     const entry = await addEntry(party, body);
 
-    await broadcastVotingStatus(partyId);
+    await broadcastVotingStatus(party.id);
 
     return NextResponse.json({ entry: serializeEntry(entry) }, { status: 201 });
   } catch (error) {

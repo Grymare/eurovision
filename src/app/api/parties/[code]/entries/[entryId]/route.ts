@@ -17,14 +17,14 @@ const updateEntrySchema = z.object({
 });
 
 type RouteContext = {
-  params: Promise<{ partyId: string; entryId: string }>;
+  params: Promise<{ code: string; entryId: string }>;
 };
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
-    const { partyId, entryId } = await context.params;
+    const { code, entryId } = await context.params;
     const hostToken = await getHostSessionToken();
-    const party = await requireHostParty(hostToken, partyId);
+    const party = await requireHostParty(hostToken, code);
     const body = parseJsonBody(updateEntrySchema, await request.json());
     const entry = await updateEntry(party, entryId, body);
 
@@ -32,7 +32,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
     }
 
-    await broadcastVotingStatus(partyId);
+    await broadcastVotingStatus(party.id);
 
     return NextResponse.json({ entry: serializeEntry(entry) });
   } catch (error) {
@@ -42,11 +42,11 @@ export async function PATCH(request: Request, context: RouteContext) {
 
 export async function DELETE(_request: Request, context: RouteContext) {
   try {
-    const { partyId, entryId } = await context.params;
+    const { code, entryId } = await context.params;
     const hostToken = await getHostSessionToken();
-    const party = await requireHostParty(hostToken, partyId);
+    const party = await requireHostParty(hostToken, code);
     await deleteEntry(party, entryId);
-    await broadcastVotingStatus(partyId);
+    await broadcastVotingStatus(party.id);
 
     return NextResponse.json({ ok: true });
   } catch (error) {

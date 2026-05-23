@@ -16,13 +16,13 @@ import { broadcastVotingStatus } from "@/lib/socket/party-broadcast";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
-  params: Promise<{ partyId: string }>;
+  params: Promise<{ code: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { partyId } = await context.params;
-    const overview = await getPartyOverview(partyId);
+    const { code } = await context.params;
+    const overview = await getPartyOverview(code);
     const hostToken = await getHostSessionToken();
     const participantToken = await getParticipantSessionToken();
     const participant = participantToken
@@ -34,11 +34,11 @@ export async function GET(_request: Request, context: RouteContext) {
       overview.party.hostSessionToken === hostToken;
 
     const viewerParticipant =
-      participant && participant.partyId === partyId ? participant : null;
+      participant && participant.partyId === overview.party.id ? participant : null;
 
     const voteRecord =
       viewerParticipant ?
-        await getParticipantVote(viewerParticipant.id, partyId)
+        await getParticipantVote(viewerParticipant.id, overview.party.id)
       : null;
 
     return NextResponse.json({
@@ -65,9 +65,9 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PATCH(request: Request, context: RouteContext) {
   try {
-    const { partyId } = await context.params;
+    const { code } = await context.params;
     const hostToken = await getHostSessionToken();
-    const party = await requireHostParty(hostToken, partyId);
+    const party = await requireHostParty(hostToken, code);
     const body = (await request.json()) as { state?: string };
 
     if (!body.state) {
@@ -84,7 +84,7 @@ export async function PATCH(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Party not found" }, { status: 404 });
     }
 
-    await broadcastVotingStatus(partyId);
+    await broadcastVotingStatus(party.id);
 
     return NextResponse.json({ party: serializeParty(updated) });
   } catch (error) {

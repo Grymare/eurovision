@@ -18,6 +18,13 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 | [EUP-008](tickets/EUP-008.md) | Vote storage & secrecy | `mvp`, `feature` |
 | [EUP-009](tickets/EUP-009.md) | Real-time voting status | `mvp`, `feature` |
 | [EUP-010](tickets/EUP-010.md) | Host voting controls | `mvp`, `feature` |
+| [EUP-011](tickets/EUP-011.md) | Score aggregation service | `mvp`, `feature` |
+| [EUP-012](tickets/EUP-012.md) | Presentation — ceremony mode (superseded) | `mvp`, `feature` |
+| [EUP-013](tickets/EUP-013.md) | Ceremony state machine v2 + host API | `mvp`, `feature` |
+| [EUP-014](tickets/EUP-014.md) | Jury intro + 1–10 reveals + reorder | `mvp`, `feature` |
+| [EUP-015](tickets/EUP-015.md) | 12-point reveal + winner finale | `mvp`, `feature` |
+| [EUP-018](tickets/EUP-018.md) | Host-only presentation page | `mvp`, `feature` |
+| [EUP-019](tickets/EUP-019.md) | Eurovision dual-column scoreboard | `mvp`, `feature` |
 
 ## Review
 
@@ -33,11 +40,6 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 |----|-------|--------|
 | [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
 | [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
-| [EUP-011](tickets/EUP-011.md) | Score aggregation service | `mvp`, `feature` |
-| [EUP-012](tickets/EUP-012.md) | Presentation — ceremony mode | `mvp`, `feature` |
-| [EUP-013](tickets/EUP-013.md) | Presentation — final scoreboard | `mvp`, `feature` |
-| [EUP-014](tickets/EUP-014.md) | Host presentation controls | `mvp`, `feature` |
-| [EUP-015](tickets/EUP-015.md) | Real-time presentation sync | `mvp`, `feature` |
 | [EUP-016](tickets/EUP-016.md) | Docker LAN deployment | `mvp`, `infra` |
 | [EUP-017](tickets/EUP-017.md) | MVP smoke test checklist | `mvp`, `chore` |
 
@@ -74,4 +76,4 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 
 ## Build order (MVP)
 
-EUP-001 → EUP-002 → EUP-003 → EUP-004 → EUP-006 → EUP-006D → EUP-007A/EUP-007B → EUP-007 → EUP-008 → EUP-009 → EUP-010 → EUP-011 → EUP-012 → EUP-013 → EUP-014 → EUP-015 → EUP-016 → EUP-017
+EUP-001 → EUP-002 → EUP-003 → EUP-004 → EUP-006 → EUP-006D → EUP-007A/EUP-007B → EUP-007 → EUP-008 → EUP-009 → EUP-010 → EUP-011 → EUP-012 → EUP-018 → EUP-019 → EUP-013 → EUP-014 → EUP-015 → EUP-016 → EUP-017

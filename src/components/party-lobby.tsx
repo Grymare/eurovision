@@ -2,6 +2,7 @@
 
 import { EntryPicker } from "@/components/entry-picker";
 import { CountryFlag } from "@/components/country-flag";
+import { GuestFinalScoreboard } from "@/components/guest-final-scoreboard";
 import { VoteBallot } from "@/components/vote-ballot";
 import { usePartySocket } from "@/hooks/use-party-socket";
 import { MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
@@ -11,10 +12,10 @@ import type {
   VoteSubmittedPayload,
   VotingStatusPayload,
 } from "@/lib/socket/party-events";
+import Link from "next/link";
 import { useCallback, useState } from "react";
 
 type PartyLobbyProps = {
-  partyId: string;
   initialData: PartyOverviewResponse;
   devMockDataEnabled?: boolean;
 };
@@ -28,20 +29,22 @@ const STATE_LABELS: Record<string, string> = {
   finished: "Finished",
 };
 
-export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }: PartyLobbyProps) {
+export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLobbyProps) {
   const [data, setData] = useState(initialData);
+  const partyCode = data.party.code;
+  const partyId = data.party.id;
   const [message, setMessage] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
 
   const refresh = useCallback(async () => {
-    const response = await fetch(`/api/parties/${partyId}`);
+    const response = await fetch(`/api/parties/${partyCode}`);
     const nextData = await response.json();
 
     if (response.ok) {
       setData(nextData);
     }
-  }, [partyId]);
+  }, [partyCode]);
 
   const applyVotingStatus = useCallback((payload: VotingStatusPayload) => {
     setData((prev) => {
@@ -121,6 +124,7 @@ export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }:
   });
 
   const joinPath = `/join/${data.party.code}`;
+  const presentationPath = `/party/${partyCode}/presentation`;
 
   async function copyJoinLink() {
     setError(null);
@@ -140,7 +144,7 @@ export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }:
     setMessage(null);
 
     try {
-      const response = await fetch(`/api/parties/${partyId}`, {
+      const response = await fetch(`/api/parties/${partyCode}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ state: nextState }),
@@ -172,6 +176,30 @@ export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }:
     data.viewer.participant &&
     (data.party.state === "voting_open" || data.party.state === "voting_closed");
   const votingLocked = data.party.state !== "voting_open";
+
+  if (data.party.state === "presenting" && !data.viewer.isHost) {
+    return (
+      <section className="section-block space-y-4 text-center">
+        <h2 className="section-heading">Presentation in progress</h2>
+        <p className="text-muted">
+          The host is revealing votes on the presentation screen. Final results will appear here
+          when the show is over.
+        </p>
+      </section>
+    );
+  }
+
+  if (data.party.state === "finished") {
+    return (
+      <section className="section-block space-y-6">
+        <div className="space-y-3 text-center">
+          <p className="eyebrow">Final results</p>
+          <h2 className="section-heading">The party is finished</h2>
+        </div>
+        <GuestFinalScoreboard partyCode={partyCode} partyId={partyId} />
+      </section>
+    );
+  }
 
   return (
     <>
@@ -253,14 +281,24 @@ export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }:
               </button>
             ) : null}
             {data.party.state === "voting_closed" ? (
-              <button
-                type="button"
-                disabled={isUpdating}
-                onClick={() => updateState("voting_open")}
-                className="btn-secondary"
-              >
-                Reopen voting
-              </button>
+              <>
+                <Link href={presentationPath} className="btn-primary">
+                  Open presentation
+                </Link>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() => updateState("voting_open")}
+                  className="btn-secondary"
+                >
+                  Reopen voting
+                </button>
+              </>
+            ) : null}
+            {data.party.state === "presenting" ? (
+              <Link href={presentationPath} className="btn-primary">
+                Return to presentation
+              </Link>
             ) : null}
           </div>
           {data.party.state === "lobby" &&
@@ -277,7 +315,7 @@ export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }:
       {showBallot ? (
         <section className="section-block">
           <VoteBallot
-            partyId={partyId}
+            partyCode={partyCode}
             entries={data.entries}
             initialVote={data.viewer.vote}
             votingLocked={votingLocked}
@@ -289,7 +327,7 @@ export function PartyLobby({ partyId, initialData, devMockDataEnabled = false }:
 
       {data.viewer.isHost ? (
         <EntryPicker
-          partyId={partyId}
+          partyCode={partyCode}
           initialEntries={data.entries}
           canEdit={canEditEntries}
           devMockDataEnabled={devMockDataEnabled}

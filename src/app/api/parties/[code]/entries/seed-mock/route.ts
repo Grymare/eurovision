@@ -17,20 +17,20 @@ const seedSchema = z.object({
 });
 
 type RouteContext = {
-  params: Promise<{ partyId: string }>;
+  params: Promise<{ code: string }>;
 };
 
 export async function POST(request: Request, context: RouteContext) {
   try {
     assertDevMockDataEnabled();
 
-    const { partyId } = await context.params;
+    const { code } = await context.params;
     const hostToken = await getHostSessionToken();
-    const party = await requireHostParty(hostToken, partyId);
+    const party = await requireHostParty(hostToken, code);
     const body = parseJsonBody(seedSchema, await request.json().catch(() => ({})));
     const result = await seedMockEntries(party, body.setId);
 
-    await broadcastVotingStatus(partyId);
+    await broadcastVotingStatus(party.id);
 
     return NextResponse.json({
       setId: result.setId,

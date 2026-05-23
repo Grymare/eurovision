@@ -470,6 +470,298 @@ body {
     animation: sparkle-pulse 700ms ease-out;
     pointer-events: none;
   }
+
+  .presentation-stage {
+    @apply min-h-[min(80vh,48rem)] space-y-8;
+  }
+
+  .presentation-stage:fullscreen {
+    @apply min-h-screen overflow-y-auto bg-stage px-6 py-8 sm:px-10;
+  }
+
+  .presentation-stage__toolbar {
+    @apply flex flex-wrap items-center justify-between gap-4;
+  }
+
+  .presentation-stage__toolbar-actions {
+    @apply flex flex-wrap gap-3;
+  }
+
+  .presentation-stage__status {
+    @apply text-center text-sm text-muted;
+  }
+
+  .presentation-stage__controls {
+    @apply flex flex-wrap justify-center gap-3 pt-2;
+  }
+
+  .presentation-ceremony {
+    @apply mx-auto flex max-w-3xl flex-col items-center gap-8 text-center;
+  }
+
+  .presentation-ceremony__heading {
+    @apply text-3xl font-semibold uppercase tracking-[0.18em] sm:text-4xl;
+    background-image: var(--gold-gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .presentation-ceremony__progress {
+    @apply text-sm uppercase tracking-[0.22em] text-muted;
+  }
+
+  .presentation-ceremony__waiting {
+    @apply max-w-md text-base text-muted;
+  }
+
+  .presentation-ceremony__order {
+    @apply w-full max-w-md text-left text-sm text-muted;
+  }
+
+  .presentation-reveal {
+    @apply w-full max-w-2xl border border-stage-border bg-stage-elevated/80 p-6 sm:p-8;
+  }
+
+  .presentation-reveal__jury {
+    @apply mb-6 text-xl font-medium text-foreground sm:text-2xl;
+  }
+
+  .presentation-reveal__allocations {
+    @apply space-y-3;
+  }
+
+  .presentation-reveal__allocation {
+    @apply flex items-center justify-between gap-4 border-b border-stage-border py-3 last:border-b-0;
+  }
+
+  .presentation-reveal__points {
+    @apply min-w-[3rem] font-mono text-2xl font-semibold tabular-nums text-gold-light sm:text-3xl;
+  }
+
+  .presentation-reveal__country {
+    @apply flex flex-1 items-center justify-end gap-3 text-base sm:text-lg;
+  }
+
+  .presentation-scoreboard {
+    @apply mx-auto w-full max-w-3xl space-y-8;
+  }
+
+  .presentation-scoreboard__header {
+    @apply space-y-3 text-center;
+  }
+
+  .presentation-scoreboard__title {
+    @apply flex flex-col items-center gap-3 text-2xl font-semibold sm:text-3xl;
+  }
+
+  .presentation-scoreboard__winner-points {
+    @apply text-base font-normal text-gold-light sm:text-lg;
+  }
+
+  .presentation-scoreboard__list {
+    @apply space-y-0;
+  }
+
+  .presentation-scoreboard__row {
+    @apply flex items-center gap-4 border-b border-stage-border py-4 last:border-b-0;
+  }
+
+  .presentation-scoreboard__row--winner {
+    background: linear-gradient(
+      90deg,
+      transparent 0%,
+      rgb(212 175 55 / 0.08) 50%,
+      transparent 100%
+    );
+  }
+
+  .presentation-scoreboard__rank {
+    @apply w-8 font-mono text-sm text-muted;
+  }
+
+  .presentation-scoreboard__country {
+    @apply flex flex-1 items-center gap-3;
+  }
+
+  .presentation-scoreboard__points {
+    @apply font-mono text-xl font-semibold tabular-nums text-gold-light sm:text-2xl;
+  }
+
+  .presentation-reveal-enter {
+    animation: presentation-reveal-enter 500ms ease-out;
+  }
+
+  .presentation-page-shell {
+    @apply relative z-10 mx-auto flex w-full max-w-none flex-1 flex-col px-4 py-4 sm:px-6;
+  }
+
+  .presentation-page {
+    @apply mx-auto flex w-full max-w-6xl flex-1 flex-col gap-4;
+    min-height: 0;
+  }
+
+  .presentation-page:fullscreen {
+    @apply max-w-none justify-start bg-stage px-8 py-8;
+  }
+
+  .presentation-page__toolbar {
+    @apply flex shrink-0 flex-wrap items-center justify-between gap-3;
+  }
+
+  .presentation-page__toolbar-main {
+    @apply flex min-w-0 flex-wrap items-center gap-x-4 gap-y-2;
+  }
+
+  .presentation-page__jury-header {
+    @apply min-w-0;
+  }
+
+  .presentation-page__jury-header--enter {
+    animation: jury-header-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) both;
+  }
+
+  .presentation-page__jury-name {
+    @apply text-lg font-semibold uppercase tracking-[0.12em] sm:text-xl;
+    background-image: var(--gold-gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .presentation-page__jury-meta {
+    @apply mt-1 text-sm text-muted;
+  }
+
+  .presentation-page__jury-meta--enter {
+    animation: jury-header-meta-enter 650ms cubic-bezier(0.16, 1, 0.3, 1) 90ms both;
+  }
+
+  .presentation-page__toolbar-actions {
+    @apply flex shrink-0 gap-3;
+  }
+
+  .presentation-page__scoreboard {
+    @apply min-h-0 flex-1 overflow-y-auto;
+  }
+
+  .presentation-page__controls {
+    @apply flex shrink-0 justify-center pt-1;
+  }
+
+  .ev-scoreboard {
+    @apply grid gap-3 md:grid-cols-2 md:gap-4;
+  }
+
+  .ev-scoreboard__column {
+    @apply flex flex-col gap-2;
+  }
+
+  .ev-scoreboard--reordering .sb-var {
+    @apply relative;
+  }
+
+  .ev-scoreboard--reordering {
+    @apply relative isolate;
+  }
+
+  .sb-var {
+    @apply relative;
+  }
+
+  .sb-var__round:not(.sb-var__round--empty) {
+    animation: ev-point-pop var(--point-reveal-pop-duration, 1100ms) ease-out both;
+  }
+
+  .jury-intro-banner {
+    @apply mx-auto max-w-xl rounded-none border border-stage-border bg-stage-elevated/80 px-6 py-8 text-center;
+  }
+
+  .jury-intro-banner--enter {
+    animation: jury-intro-enter 700ms ease-out;
+  }
+
+  .jury-intro-banner__name {
+    @apply mt-3 text-3xl font-semibold uppercase tracking-[0.14em] sm:text-4xl;
+    background-image: var(--gold-gradient-text);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+
+  .jury-intro-banner__meta {
+    @apply mt-2 text-sm;
+  }
+
+  .winner-overlay {
+    @apply fixed inset-0 z-50 flex items-center justify-center overflow-visible bg-black/80 px-6;
+  }
+
+  .winner-overlay--enter {
+    animation: winner-overlay-enter 500ms ease-out;
+  }
+
+  .winner-overlay__content {
+    @apply relative z-10 w-full max-w-2xl overflow-visible border border-stage-border bg-stage-elevated px-8 py-12 text-center;
+  }
+
+  .winner-overlay__close {
+    @apply absolute right-4 top-4 z-20 inline-flex h-10 w-10 items-center justify-center border border-stage-border bg-stage/70 text-muted transition-colors duration-150;
+  }
+
+  .winner-overlay__close:hover,
+  .winner-overlay__close:focus-visible {
+    @apply border-gold-light/40 text-foreground;
+  }
+
+  .winner-overlay__title,
+  .winner-overlay__points,
+  .winner-overlay__content > .eyebrow {
+    @apply relative z-10;
+  }
+
+  .winner-confetti {
+    @apply pointer-events-none absolute left-1/2 top-1/2 z-[5] h-0 w-0 overflow-visible;
+  }
+
+  .winner-confetti__piece {
+    position: absolute;
+    left: 0;
+    top: 0;
+    border-radius: 1px;
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.15);
+    animation-name: winner-confetti-burst;
+    animation-timing-function: cubic-bezier(0.18, 0.84, 0.32, 1);
+    animation-fill-mode: forwards;
+  }
+
+  .winner-confetti__piece--dot {
+    border-radius: 9999px;
+  }
+
+  .winner-confetti__piece--light {
+    background: linear-gradient(135deg, #fff7df 0%, #f5e6c8 100%);
+    box-shadow: 0 0 8px rgb(245 230 200 / 0.55);
+  }
+
+  .winner-confetti__piece--mid {
+    background: linear-gradient(135deg, #f0e0b0 0%, #d4af37 100%);
+    box-shadow: 0 0 8px rgb(212 175 55 / 0.45);
+  }
+
+  .winner-confetti__piece--deep {
+    background: linear-gradient(135deg, #c9a227 0%, #8b6914 100%);
+    box-shadow: 0 0 6px rgb(139 105 20 / 0.4);
+  }
+
+  .winner-overlay__title {
+    @apply mt-4 flex flex-col items-center gap-4 text-3xl font-semibold sm:text-4xl;
+  }
+
+  .winner-overlay__points {
+    @apply mt-4 font-mono text-2xl text-gold-light;
+  }
 }
 
 @supports not (background-clip: text) {
@@ -495,10 +787,137 @@ body {
   }
 }
 
+@keyframes presentation-reveal-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.75rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes ev-point-pop {
+  from {
+    opacity: 0;
+    transform: scale(0.96) translateY(0.12rem);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1) translateY(0);
+  }
+}
+
+@keyframes ev-gold-sweep {
+  from {
+    transform: translateX(-130%);
+  }
+  to {
+    transform: translateX(130%);
+  }
+}
+
+@keyframes ev-glitter {
+  from {
+    opacity: 0;
+  }
+  50% {
+    opacity: 1;
+  }
+  to {
+    opacity: 0.35;
+  }
+}
+
+@keyframes jury-header-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.25rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jury-header-meta-enter {
+  from {
+    opacity: 0;
+    transform: translateY(0.2rem);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes jury-intro-enter {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes winner-overlay-enter {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes winner-confetti-burst {
+  0% {
+    opacity: 0;
+    transform: translate(-50%, -50%) scale(0.12) rotate(0deg);
+  }
+  10% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(1.05) rotate(calc(var(--burst-spin, 0deg) * 0.12));
+  }
+  42% {
+    opacity: 1;
+    transform: translate(
+        calc(-50% + var(--burst-x, 0px) * 0.88),
+        calc(-50% + var(--burst-y, 0px) * 0.88)
+      )
+      rotate(calc(var(--burst-spin, 0deg) * 0.5));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(
+        calc(-50% + var(--burst-x, 0px) * 1.08),
+        calc(-50% + var(--burst-y, 0px) * 1.08 + 160px)
+      )
+      rotate(var(--burst-spin, 0deg));
+  }
+}
+
 @media (prefers-reduced-motion: reduce) {
   .sparkle-burst::after {
     animation: none;
     opacity: 0;
+  }
+
+  .presentation-reveal-enter {
+    animation: none;
+  }
+
+  .sb-var__round:not(.sb-var__round--empty),
+  .sb-var__gold-sweep,
+  .sb-var__glitter,
+  .presentation-page__jury-header--enter,
+  .presentation-page__jury-meta--enter,
+  .winner-confetti__piece,
+  .jury-intro-banner--enter,
+  .winner-overlay--enter {
+    animation: none;
   }
 
   *,

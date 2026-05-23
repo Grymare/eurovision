@@ -14,7 +14,7 @@ import type { SerializedEntry } from "@/lib/party/types";
 import { useState } from "react";
 
 type VoteBallotProps = {
-  partyId: string;
+  partyCode: string;
   entries: SerializedEntry[];
   initialVote: SerializedVote | null;
   votingLocked?: boolean;
@@ -102,7 +102,7 @@ function BallotSummary({
 }
 
 export function VoteBallot({
-  partyId,
+  partyCode,
   entries,
   initialVote,
   votingLocked = false,
@@ -134,7 +134,7 @@ export function VoteBallot({
     }
 
     try {
-      const response = await fetch(`/api/parties/${partyId}/vote`, {
+      const response = await fetch(`/api/parties/${partyCode}/vote`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ allocations }),

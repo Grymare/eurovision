@@ -32,7 +32,7 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
         throw new Error(data.error ?? "Could not join party");
       }
 
-      router.push(`/party/${data.party.id}`);
+      router.push(`/party/${data.party.code}`);
     } catch (submitError) {
       setError(
         submitError instanceof Error ? submitError.message : "Could not join party",

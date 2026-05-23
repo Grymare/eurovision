@@ -7,7 +7,7 @@ import { isDevMockDataEnabled } from "@/lib/dev/mock-data";
 import {
   getParticipantBySessionToken,
   getParticipantVote,
-  getPartyById,
+  getPartyByRef,
   listEntries,
   listParticipants,
   parseVoteAllocations,
@@ -22,18 +22,18 @@ export const dynamic = "force-dynamic";
 export default async function PartyPage({
   params,
 }: {
-  params: Promise<{ partyId: string }>;
+  params: Promise<{ code: string }>;
 }) {
-  const { partyId } = await params;
-  const party = await getPartyById(partyId);
+  const { code } = await params;
+  const party = await getPartyByRef(code);
 
   if (!party) {
     notFound();
   }
 
   const [entries, participants, hostToken, participantToken] = await Promise.all([
-    listEntries(partyId),
-    listParticipants(partyId),
+    listEntries(party.id),
+    listParticipants(party.id),
     getHostSessionToken(),
     getParticipantSessionToken(),
   ]);
@@ -43,10 +43,10 @@ export default async function PartyPage({
     : null;
   const isHost = Boolean(hostToken) && party.hostSessionToken === hostToken;
   const viewerParticipant =
-    participant && participant.partyId === partyId ? participant : null;
+    participant && participant.partyId === party.id ? participant : null;
   const voteRecord =
     viewerParticipant ?
-      await getParticipantVote(viewerParticipant.id, partyId)
+      await getParticipantVote(viewerParticipant.id, party.id)
     : null;
 
   return (
@@ -59,7 +59,6 @@ export default async function PartyPage({
       </header>
 
       <PartyLobby
-        partyId={partyId}
         devMockDataEnabled={isDevMockDataEnabled()}
         initialData={{
           party: serializeParty(party),

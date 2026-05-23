@@ -4,6 +4,7 @@ import {
   getParticipantVote,
   parseVoteAllocations,
   requireParticipantForParty,
+  resolvePartyRef,
   submitParticipantVote,
 } from "@/lib/party/service";
 import { broadcastVoteSubmitted } from "@/lib/socket/party-broadcast";
@@ -11,15 +12,16 @@ import type { VoteAllocations } from "@/db/schema";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
-  params: Promise<{ partyId: string }>;
+  params: Promise<{ code: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { partyId } = await context.params;
+    const { code } = await context.params;
+    const party = await resolvePartyRef(code);
     const participantToken = await getParticipantSessionToken();
-    const participant = await requireParticipantForParty(participantToken, partyId);
-    const vote = await getParticipantVote(participant.id, partyId);
+    const participant = await requireParticipantForParty(participantToken, code);
+    const vote = await getParticipantVote(participant.id, party.id);
 
     if (!vote) {
       return NextResponse.json({ hasVoted: false, allocations: null });
@@ -36,9 +38,10 @@ export async function GET(_request: Request, context: RouteContext) {
 
 export async function PUT(request: Request, context: RouteContext) {
   try {
-    const { partyId } = await context.params;
+    const { code } = await context.params;
+    const party = await resolvePartyRef(code);
     const participantToken = await getParticipantSessionToken();
-    const participant = await requireParticipantForParty(participantToken, partyId);
+    const participant = await requireParticipantForParty(participantToken, code);
     const body = (await request.json()) as { allocations?: VoteAllocations };
 
     if (!body.allocations || typeof body.allocations !== "object") {
@@ -46,7 +49,7 @@ export async function PUT(request: Request, context: RouteContext) {
     }
 
     const vote = await submitParticipantVote({
-      partyId,
+      partyId: party.id,
       participantId: participant.id,
       allocations: body.allocations,
     });
@@ -55,7 +58,7 @@ export async function PUT(request: Request, context: RouteContext) {
       return NextResponse.json({ error: "Failed to save vote" }, { status: 500 });
     }
 
-    await broadcastVoteSubmitted(partyId, participant.id, participant.nickname);
+    await broadcastVoteSubmitted(party.id, participant.id, participant.nickname);
 
     return NextResponse.json({
       hasVoted: true,

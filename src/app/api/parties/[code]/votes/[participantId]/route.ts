@@ -11,25 +11,25 @@ import { assertVoteDetailsRevealable } from "@/lib/party/vote-secrecy";
 import { NextResponse } from "next/server";
 
 type RouteContext = {
-  params: Promise<{ partyId: string; participantId: string }>;
+  params: Promise<{ code: string; participantId: string }>;
 };
 
 export async function GET(_request: Request, context: RouteContext) {
   try {
-    const { partyId, participantId } = await context.params;
+    const { code, participantId } = await context.params;
     const hostToken = await getHostSessionToken();
     const participantToken = await getParticipantSessionToken();
-    const { party } = await requirePartyViewer(hostToken, participantToken, partyId);
+    const { party } = await requirePartyViewer(hostToken, participantToken, code);
 
     assertVoteDetailsRevealable(party.state);
 
-    const vote = await getParticipantVote(participantId, partyId);
+    const vote = await getParticipantVote(participantId, party.id);
 
     if (!vote) {
       return NextResponse.json({ error: "Vote not found" }, { status: 404 });
     }
 
-    const participantList = await listParticipants(partyId);
+    const participantList = await listParticipants(party.id);
     const participant = participantList.find((entry) => entry.id === participantId) ?? null;
 
     return NextResponse.json({

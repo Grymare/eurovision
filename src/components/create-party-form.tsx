@@ -28,7 +28,7 @@ export function CreatePartyForm() {
         throw new Error(data.error ?? "Could not create party");
       }
 
-      router.push(`/party/${data.party.id}`);
+      router.push(`/party/${data.party.code}`);
     } catch (submitError) {
       setError(
         submitError instanceof Error
