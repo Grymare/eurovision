@@ -9,7 +9,7 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 | Mood | **TV broadcast** — black stage, gold spotlight, Eurovision night energy |
 | Color scheme | **Black / grey + gold** — neutral darks, no blue tint |
 | Default theme | **Dark** (no light mode in MVP; add toggle later if needed) |
-| Accent | **Gold / amber** — “douze points” trophy moments |
+| Accent | **Metallic gold** — gradients and shine, not flat fills |
 | Presentation | **Fullscreen dark scoreboard** — huge type, minimal chrome, TV/projector first |
 | Motion | **Subtle** fades/slides; optional **gold sparkles** on 12-point reveals with `prefers-reduced-motion` fallback |
 
@@ -28,6 +28,21 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 | `--on-gold` | `#1A1408` | Text/icons on gold buttons |
 | `--success` | `#4ADE80` | Status confirmations |
 | `--danger` | `#F87171` | Errors, destructive actions |
+
+### Metallic gold (gradients)
+
+Use gradients for hero accents — party codes, primary buttons, display type — not flat `#E8B923` blocks everywhere.
+
+| Token | Usage |
+|-------|--------|
+| `--gold-gradient-text` | Headlines, party code, secondary button labels |
+| `--gold-gradient-surface` | Primary buttons (with inset highlight + shine overlay) |
+| `--gold-gradient-border` | Secondary button rings, panel accent lines, sparkle burst |
+| `--gold-gradient-shine` | Specular highlight layer on primary buttons |
+
+Utility classes: `.gold-metallic-text`, `.display-title`, `.btn-primary`, `.btn-secondary` (gradient border + label).
+
+Solid `--gold` / `--gold-bright` remain for focus rings and small UI hints where gradients would be noisy.
 
 ### Contrast checks (WCAG 2.2 AA)
 
@@ -71,9 +86,10 @@ Agreed in design session. Implements **WCAG 2.2 AA** contrast targets on core UI
 
 ## Components (semantic)
 
-- **Primary button:** gold background, dark text, visible focus ring (2px gold-bright offset)
-- **Secondary button:** transparent, gold border, gold-bright text
-- **Card:** stage-elevated, stage-border, rounded-xl
+- **Primary button:** metallic gold gradient surface, dark `--on-gold` text, inset shine
+- **Secondary button:** gradient gold border + gradient label text
+- **Display / party code:** gradient text (`.display-title`, `.gold-metallic-text`)
+- **Cards:** neutral grey panels; optional `.panel-accent` gold gradient top edge
 - **Live region:** polite `aria-live` for vote status (no motion required)
 - **Flag + name:** always paired; never flag-only
 

@@ -87,7 +87,7 @@ export function EntryPicker({
             Add at least {MIN_PARTY_ENTRIES} countries before opening voting.
           </p>
         </div>
-        <p className="text-sm font-medium text-gold-bright">
+        <p className="text-sm font-medium gold-metallic-text">
           {entries.length} / {MIN_PARTY_ENTRIES} minimum
         </p>
       </div>

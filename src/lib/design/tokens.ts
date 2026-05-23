@@ -15,6 +15,11 @@ export const designTokens = {
     success: "#4ADE80",
     danger: "#F87171",
   },
+  gradients: {
+    text: "180deg: #fff9e6 → #ffd54f → #e8b923 → #fff3b0 → #c9a227",
+    surface: "165deg multi-stop bronze-gold highlight",
+    border: "135deg deep gold shimmer ring",
+  },
   motion: {
     fast: "150ms",
     normal: "250ms",

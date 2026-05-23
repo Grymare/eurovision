@@ -92,8 +92,8 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
 
   return (
     <div className="space-y-6">
-      <section className="panel">
-        <div className="flex flex-wrap items-start justify-between gap-4">
+      <section className="panel panel-accent">
+        <div className="flex flex-wrap items-start justify-between gap-4 pt-1">
           <div>
             <p className="eyebrow">Party code</p>
             <p className="display-title mt-1 text-5xl tracking-[0.2em]">
@@ -128,7 +128,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
       </section>
 
       {data.viewer.isHost ? (
-        <section aria-labelledby="host-controls-heading" className="panel space-y-3">
+        <section aria-labelledby="host-controls-heading" className="panel panel-accent space-y-3">
           <h2 id="host-controls-heading" className="text-lg font-semibold">
             Host controls
           </h2>
@@ -140,7 +140,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
                 onClick={() => updateState("lobby")}
                 className="btn-secondary"
               >
-                Open lobby
+                <span className="btn-label">Open lobby</span>
               </button>
             ) : null}
             {data.party.state === "lobby" ? (

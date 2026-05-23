@@ -98,7 +98,9 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
       ) : null}
 
       <button type="submit" disabled={isSubmitting} className="btn-secondary">
-        {isSubmitting ? "Joining..." : "Join party"}
+        <span className="btn-label">
+          {isSubmitting ? "Joining..." : "Join party"}
+        </span>
       </button>
     </form>
   );

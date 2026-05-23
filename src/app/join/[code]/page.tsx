@@ -15,7 +15,7 @@ export default async function JoinPage({
           <h1 className="text-3xl font-semibold tracking-tight">Join party</h1>
           <p className="text-base text-muted">
             You were invited to party code{" "}
-            <strong className="font-mono tracking-[0.2em] text-gold-bright">
+            <strong className="font-mono tracking-[0.2em] gold-metallic-text">
               {code.toUpperCase()}
             </strong>
             .
