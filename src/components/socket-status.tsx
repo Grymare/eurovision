@@ -47,23 +47,20 @@ export function SocketStatus() {
   return (
     <section
       aria-labelledby="socket-status-heading"
-      className="w-full rounded-xl border border-zinc-200 bg-zinc-50 p-4 dark:border-zinc-800 dark:bg-zinc-900"
+      className="panel"
     >
-      <h2
-        id="socket-status-heading"
-        className="text-sm font-semibold uppercase tracking-wide text-zinc-700 dark:text-zinc-300"
-      >
+      <h2 id="socket-status-heading" className="text-sm font-semibold uppercase tracking-wide text-muted">
         Live connection
       </h2>
-      <p className="mt-2 text-base text-zinc-900 dark:text-zinc-100">{message}</p>
-      <dl className="mt-3 grid gap-2 text-sm text-zinc-600 dark:text-zinc-400">
+      <p className="mt-2 text-base">{message}</p>
+      <dl className="mt-3 grid gap-2 text-sm text-muted">
         <div className="flex gap-2">
-          <dt className="font-medium text-zinc-800 dark:text-zinc-200">Status:</dt>
+          <dt className="font-medium text-foreground">Status:</dt>
           <dd>{state}</dd>
         </div>
         {lastPong ? (
           <div className="flex gap-2">
-            <dt className="font-medium text-zinc-800 dark:text-zinc-200">Last ping:</dt>
+            <dt className="font-medium text-foreground">Last ping:</dt>
             <dd>
               <time dateTime={lastPong}>{lastPong}</time>
             </dd>

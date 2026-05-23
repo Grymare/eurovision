@@ -1,26 +1,131 @@
 @import "tailwindcss";
 
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  color-scheme: dark;
+
+  --stage: #0b0f1a;
+  --stage-elevated: #151b2b;
+  --stage-border: #2a3548;
+  --foreground: #f4f4f5;
+  --muted: #a8b0c2;
+  --gold: #e8b923;
+  --gold-bright: #ffd54f;
+  --gold-deep: #a67c00;
+  --on-gold: #1a1408;
+  --success: #4ade80;
+  --danger: #f87171;
+
+  --background: var(--stage);
+  --foreground-color: var(--foreground);
 }
 
 @theme inline {
-  --color-background: var(--background);
+  --color-stage: var(--stage);
+  --color-stage-elevated: var(--stage-elevated);
+  --color-stage-border: var(--stage-border);
   --color-foreground: var(--foreground);
+  --color-muted: var(--muted);
+  --color-gold: var(--gold);
+  --color-gold-bright: var(--gold-bright);
+  --color-gold-deep: var(--gold-deep);
+  --color-on-gold: var(--on-gold);
+  --color-success: var(--success);
+  --color-danger: var(--danger);
+  --color-background: var(--background);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-bebas-neue);
 }
 
 body {
-  background: var(--background);
+  background: var(--stage);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-geist-sans), system-ui, sans-serif;
+}
+
+@layer components {
+  .panel {
+    @apply rounded-xl border border-stage-border bg-stage-elevated p-4;
+  }
+
+  .eyebrow {
+    @apply text-sm font-medium uppercase tracking-[0.2em] text-gold-bright;
+  }
+
+  .page-shell {
+    @apply flex min-h-full flex-col bg-stage text-foreground;
+  }
+
+  .page-main {
+    @apply mx-auto flex w-full flex-1 flex-col gap-6 px-4 py-10 sm:px-6;
+  }
+
+  .field-label {
+    @apply block text-sm font-medium text-foreground;
+  }
+
+  .field-input {
+    @apply w-full rounded-md border border-stage-border bg-stage px-3 py-2 text-base text-foreground focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright;
+  }
+
+  .btn-primary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-md bg-gold px-4 py-2 text-sm font-semibold text-on-gold transition-colors hover:bg-gold-bright focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-secondary {
+    @apply inline-flex min-h-11 items-center justify-center rounded-md border border-gold-deep px-4 py-2 text-sm font-semibold text-gold-bright transition-colors hover:border-gold-bright hover:bg-stage-elevated focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-gold-bright disabled:cursor-not-allowed disabled:opacity-60;
+  }
+
+  .btn-danger {
+    @apply inline-flex min-h-11 items-center justify-center rounded-md px-3 text-sm font-medium text-danger hover:bg-stage focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger;
+  }
+
+  .display-title {
+    font-family: var(--font-bebas-neue), sans-serif;
+    @apply tracking-wide text-gold-bright;
+  }
+
+  .sparkle-burst {
+    position: relative;
+  }
+
+  .sparkle-burst::after {
+    content: "";
+    position: absolute;
+    inset: -0.5rem;
+    border-radius: 9999px;
+    border: 2px solid color-mix(in srgb, var(--gold-bright) 70%, transparent);
+    opacity: 0;
+    animation: sparkle-pulse 600ms ease-out;
+    pointer-events: none;
+  }
+}
+
+@keyframes sparkle-pulse {
+  0% {
+    opacity: 0;
+    transform: scale(0.85);
+  }
+  40% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: scale(1.15);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .sparkle-burst::after {
+    animation: none;
+    opacity: 0;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
 }

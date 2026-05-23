@@ -92,23 +92,25 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
 
   return (
     <div className="space-y-6">
-      <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+      <section className="panel">
         <div className="flex flex-wrap items-start justify-between gap-4">
           <div>
-            <p className="text-sm font-medium uppercase tracking-[0.2em] text-violet-700 dark:text-violet-300">
-              Party code
-            </p>
-            <p className="mt-1 text-3xl font-semibold tracking-[0.25em]">
+            <p className="eyebrow">Party code</p>
+            <p className="display-title mt-1 text-5xl tracking-[0.2em]">
               {data.party.code}
             </p>
-            <p className="mt-2 text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="mt-3 text-sm text-muted">
               Status:{" "}
-              <strong>{STATE_LABELS[data.party.state] ?? data.party.state}</strong>
+              <strong className="text-foreground">
+                {STATE_LABELS[data.party.state] ?? data.party.state}
+              </strong>
             </p>
             {data.viewer.participant ? (
-              <p className="mt-1 text-sm text-zinc-600 dark:text-zinc-300">
+              <p className="mt-1 text-sm text-muted">
                 You are logged in as{" "}
-                <strong>{data.viewer.participant.nickname}</strong>
+                <strong className="text-foreground">
+                  {data.viewer.participant.nickname}
+                </strong>
                 {data.viewer.participant.isHost ? " (host)" : ""}.
               </p>
             ) : null}
@@ -116,24 +118,17 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
 
           {data.viewer.isHost ? (
             <div className="flex flex-col gap-2">
-              <button
-                type="button"
-                onClick={copyJoinLink}
-                className="inline-flex min-h-11 items-center justify-center rounded-md bg-violet-700 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600"
-              >
+              <button type="button" onClick={copyJoinLink} className="btn-primary">
                 Copy join link
               </button>
-              <p className="break-all text-xs text-zinc-500">{joinUrl}</p>
+              <p className="break-all text-xs text-muted">{joinUrl}</p>
             </div>
           ) : null}
         </div>
       </section>
 
       {data.viewer.isHost ? (
-        <section
-          aria-labelledby="host-controls-heading"
-          className="space-y-3 rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
-        >
+        <section aria-labelledby="host-controls-heading" className="panel space-y-3">
           <h2 id="host-controls-heading" className="text-lg font-semibold">
             Host controls
           </h2>
@@ -143,7 +138,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
                 type="button"
                 disabled={isUpdating}
                 onClick={() => updateState("lobby")}
-                className="inline-flex min-h-11 items-center justify-center rounded-md border border-zinc-300 px-4 py-2 text-sm font-semibold hover:bg-zinc-50 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 dark:border-zinc-700 dark:hover:bg-zinc-800"
+                className="btn-secondary"
               >
                 Open lobby
               </button>
@@ -153,7 +148,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
                 type="button"
                 disabled={isUpdating || data.entries.length < MIN_PARTY_ENTRIES}
                 onClick={() => updateState("voting_open")}
-                className="inline-flex min-h-11 items-center justify-center rounded-md bg-violet-700 px-4 py-2 text-sm font-semibold text-white hover:bg-violet-800 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-violet-600 disabled:opacity-60"
+                className="btn-primary"
               >
                 Start voting
               </button>
@@ -161,7 +156,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           </div>
           {data.party.state === "lobby" &&
           data.entries.length < MIN_PARTY_ENTRIES ? (
-            <p className="text-sm text-zinc-600 dark:text-zinc-300">
+            <p className="text-sm text-muted">
               Add {MIN_PARTY_ENTRIES - data.entries.length} more{" "}
               {MIN_PARTY_ENTRIES - data.entries.length === 1 ? "country" : "countries"}{" "}
               to start voting.
@@ -178,7 +173,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           onChange={refresh}
         />
       ) : (
-        <section className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900">
+        <section className="panel">
           <h2 className="text-lg font-semibold">Countries</h2>
           <ul className="mt-3 space-y-2">
             {data.entries.map((entry) => (
@@ -191,10 +186,7 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
         </section>
       )}
 
-      <section
-        aria-labelledby="participants-heading"
-        className="rounded-xl border border-zinc-200 bg-white p-4 dark:border-zinc-800 dark:bg-zinc-900"
-      >
+      <section aria-labelledby="participants-heading" className="panel">
         <h2 id="participants-heading" className="text-lg font-semibold">
           Participants
         </h2>
@@ -202,14 +194,18 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
           {data.participants.map((participant) => (
             <li
               key={participant.id}
-              className="flex items-center justify-between gap-3 rounded-md bg-zinc-50 px-3 py-2 dark:bg-zinc-950"
+              className="flex items-center justify-between gap-3 rounded-md border border-stage-border bg-stage px-3 py-2"
             >
               <span>
                 {participant.nickname}
                 {participant.isHost ? " (host)" : ""}
               </span>
-              <span className="text-sm text-zinc-600 dark:text-zinc-300">
-                {participant.hasVoted ? "Voted" : "Not voted yet"}
+              <span className="text-sm text-muted">
+                {participant.hasVoted ? (
+                  <span className="text-success">Voted</span>
+                ) : (
+                  "Not voted yet"
+                )}
               </span>
             </li>
           ))}
@@ -217,12 +213,12 @@ export function PartyLobby({ partyId, initialData }: PartyLobbyProps) {
       </section>
 
       {message ? (
-        <p role="status" className="text-sm text-green-700 dark:text-green-300">
+        <p role="status" className="text-sm text-success">
           {message}
         </p>
       ) : null}
       {error ? (
-        <p role="alert" className="text-sm text-red-700 dark:text-red-300">
+        <p role="alert" className="text-sm text-danger">
           {error}
         </p>
       ) : null}

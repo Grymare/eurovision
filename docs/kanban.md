@@ -9,6 +9,11 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 | ID | Title | Labels |
 |----|-------|--------|
 | [EUP-001](tickets/EUP-001.md) | Project scaffold | `mvp`, `infra` |
+| [EUP-002](tickets/EUP-002.md) | Database schema | `mvp`, `infra` |
+| [EUP-003](tickets/EUP-003.md) | Country entry picker (custom) | `mvp`, `feature` |
+| [EUP-004](tickets/EUP-004.md) | Party create & join | `mvp`, `feature` |
+| [EUP-006](tickets/EUP-006.md) | Party lobby & host dashboard | `mvp`, `feature` |
+| [EUP-006D](tickets/EUP-006D.md) | Design brainstorming session | `mvp`, `chore` |
 
 ## Review
 
@@ -22,7 +27,9 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 
 | ID | Title | Labels |
 |----|-------|--------|
-| [EUP-002](tickets/EUP-002.md) | Database schema | `mvp`, `infra` |
+| [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
+| [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
+| [EUP-007](tickets/EUP-007.md) | Classic 12-point vote UI | `mvp`, `feature` |
 
 ## Backlog
 
@@ -30,13 +37,6 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`
 
 | ID | Title | Labels |
 |----|-------|--------|
-| [EUP-003](tickets/EUP-003.md) | Country entry picker (custom) | `mvp`, `feature` |
-| [EUP-004](tickets/EUP-004.md) | Party create & join | `mvp`, `feature` |
-| [EUP-006](tickets/EUP-006.md) | Party lobby & host dashboard | `mvp`, `feature` |
-| [EUP-006D](tickets/EUP-006D.md) | Design brainstorming session | `mvp`, `chore` |
-| [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
-| [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
-| [EUP-007](tickets/EUP-007.md) | Classic 12-point vote UI | `mvp`, `feature` |
 | [EUP-008](tickets/EUP-008.md) | Vote storage & secrecy | `mvp`, `feature` |
 | [EUP-009](tickets/EUP-009.md) | Real-time voting status | `mvp`, `feature` |
 | [EUP-010](tickets/EUP-010.md) | Host voting controls | `mvp`, `feature` |

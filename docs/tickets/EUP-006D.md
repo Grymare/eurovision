@@ -1,6 +1,6 @@
 ﻿# EUP-006D — Design brainstorming session
 
-**Status:** Backlog  
+**Status:** Done  
 **Phase:** MVP  
 **Labels:** mvp, chore
 
@@ -10,11 +10,11 @@ Collaborative design session after lobby works (EUP-006), before styled vote UI 
 
 ## Acceptance criteria
 
-- [ ] Mood / direction agreed (Eurovision energy vs minimal)
-- [ ] Color palette passes WCAG 2.2 AA contrast checks
-- [ ] Typography scale for mobile + presentation/TV documented
-- [ ] Wireframes for Home, Vote, Host dashboard, Presentation
-- [ ] Tailwind theme tokens captured for implementation
+- [x] Mood / direction agreed (Eurovision energy vs minimal)
+- [x] Color palette passes WCAG 2.2 AA contrast checks
+- [x] Typography scale for mobile + presentation/TV documented
+- [x] Wireframes for Home, Vote, Host dashboard, Presentation
+- [x] Tailwind theme tokens captured for implementation
 
 ## Dependencies
 
