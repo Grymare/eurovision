@@ -693,6 +693,15 @@ export async function deleteEntry(
   }
 }
 
+export async function clearAllEntries(
+  party: Party,
+  options: { clearVotes?: boolean } = {},
+) {
+  await requireEntryEditAllowed(party, options.clearVotes);
+
+  db.delete(partyEntries).where(eq(partyEntries.partyId, party.id)).run();
+}
+
 export async function removeParticipant(party: Party, participantId: string) {
   if (!canRemoveParticipant(party.state)) {
     throw new AppError(

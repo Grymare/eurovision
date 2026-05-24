@@ -15,7 +15,7 @@ import {
   serializeParticipant,
   serializeParty,
 } from "@/lib/party/service";
-import { notFound } from "next/navigation";
+import { notFound, redirect } from "next/navigation";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +29,10 @@ export default async function PartyPage({
 
   if (!party) {
     notFound();
+  }
+
+  if (party.state === "finished") {
+    redirect(`/history/${party.code}`);
   }
 
   const [entries, participants, hostToken, participantToken] = await Promise.all([

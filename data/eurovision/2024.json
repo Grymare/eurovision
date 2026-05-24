@@ -1,0 +1,33 @@
+{
+  "year": 2024,
+  "label": "Eurovision 2024 Grand Final (Malmö)",
+  "hostCity": "Malmö",
+  "source": "manual",
+  "entries": [
+    { "name": "Sweden", "flagEmoji": "🇸🇪" },
+    { "name": "Ukraine", "flagEmoji": "🇺🇦" },
+    { "name": "Germany", "flagEmoji": "🇩🇪" },
+    { "name": "Luxembourg", "flagEmoji": "🇱🇺" },
+    { "name": "Israel", "flagEmoji": "🇮🇱" },
+    { "name": "Lithuania", "flagEmoji": "🇱🇹" },
+    { "name": "Spain", "flagEmoji": "🇪🇸" },
+    { "name": "Estonia", "flagEmoji": "🇪🇪" },
+    { "name": "Ireland", "flagEmoji": "🇮🇪" },
+    { "name": "Latvia", "flagEmoji": "🇱🇻" },
+    { "name": "Greece", "flagEmoji": "🇬🇷" },
+    { "name": "United Kingdom", "flagEmoji": "🇬🇧" },
+    { "name": "Norway", "flagEmoji": "🇳🇴" },
+    { "name": "Italy", "flagEmoji": "🇮🇹" },
+    { "name": "Serbia", "flagEmoji": "🇷🇸" },
+    { "name": "Finland", "flagEmoji": "🇫🇮" },
+    { "name": "Portugal", "flagEmoji": "🇵🇹" },
+    { "name": "Armenia", "flagEmoji": "🇦🇲" },
+    { "name": "Cyprus", "flagEmoji": "🇨🇾" },
+    { "name": "Switzerland", "flagEmoji": "🇨🇭" },
+    { "name": "Slovenia", "flagEmoji": "🇸🇮" },
+    { "name": "Croatia", "flagEmoji": "🇭🇷" },
+    { "name": "Georgia", "flagEmoji": "🇬🇪" },
+    { "name": "France", "flagEmoji": "🇫🇷" },
+    { "name": "Austria", "flagEmoji": "🇦🇹" }
+  ]
+}

@@ -1,7 +1,9 @@
 "use client";
 
+import { ConfirmPanel } from "@/components/confirm-panel";
 import { CountryAutocomplete } from "@/components/country-autocomplete";
 import { CountryFlag } from "@/components/country-flag";
+import { FieldSelect } from "@/components/field-select";
 import { findCountryCatalogEntry } from "@/lib/countries/catalog";
 import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import type { SerializedEntry } from "@/lib/party/types";
@@ -37,6 +39,8 @@ export function EntryPicker({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
   const [isImporting, setIsImporting] = useState(false);
+  const [isClearing, setIsClearing] = useState(false);
+  const [pendingClearAll, setPendingClearAll] = useState(false);
   const [availableYears, setAvailableYears] = useState<EurovisionYearSummary[]>([]);
   const [selectedYear, setSelectedYear] = useState<number | "">("");
   const showEntryMinimumHint = canEdit;
@@ -175,6 +179,34 @@ export function EntryPicker({
     onChange?.();
   }
 
+  async function handleClearAll() {
+    setIsClearing(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/parties/${partyCode}/entries`, {
+        method: "DELETE",
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not clear countries");
+      }
+
+      setPendingClearAll(false);
+      onChange?.();
+    } catch (clearError) {
+      setError(clearError instanceof Error ? clearError.message : "Could not clear countries");
+    } finally {
+      setIsClearing(false);
+    }
+  }
+
+  const yearOptions = availableYears.map((yearOption) => ({
+    value: String(yearOption.year),
+    label: `${yearOption.label} (${yearOption.entryCount})`,
+  }));
+
   return (
     <section aria-labelledby="entries-heading" className="section-block space-y-5">
       <div className="flex flex-wrap items-end justify-between gap-3">
@@ -192,12 +224,35 @@ export function EntryPicker({
             </p>
           : null}
         </div>
-        {showEntryCount ?
-          <p className="text-sm text-muted">
-            <span className="text-foreground">{entries.length}</span> / {MIN_PARTY_ENTRIES}
-          </p>
-        : null}
+        <div className="flex flex-wrap items-center gap-3">
+          {showEntryCount ?
+            <p className="text-sm text-muted">
+              <span className="text-foreground">{entries.length}</span> / {MIN_PARTY_ENTRIES}
+            </p>
+          : null}
+          {canEdit && entries.length > 0 ?
+            <button
+              type="button"
+              onClick={() => setPendingClearAll(true)}
+              disabled={isClearing || isSubmitting || isImporting || isSeeding}
+              className="btn-secondary"
+            >
+              Clear all
+            </button>
+          : null}
+        </div>
       </div>
+
+      {pendingClearAll ?
+        <ConfirmPanel
+          title="Remove all countries?"
+          message={`This removes all ${entries.length} countries from the party list.`}
+          confirmLabel="Yes, clear all"
+          isBusy={isClearing}
+          onConfirm={handleClearAll}
+          onCancel={() => setPendingClearAll(false)}
+        />
+      : null}
 
       {entries.length === 0 ? (
         <p className="text-sm text-muted">No countries added yet.</p>
@@ -240,24 +295,19 @@ export function EntryPicker({
               <label htmlFor="import-year" className="field-label">
                 Year
               </label>
-              <select
+              <FieldSelect
                 id="import-year"
-                value={selectedYear}
-                onChange={(event) => setSelectedYear(Number(event.target.value))}
-                className="field-input"
-                disabled={isImporting || isSubmitting || isSeeding}
-              >
-                {availableYears.map((yearOption) => (
-                  <option key={yearOption.year} value={yearOption.year}>
-                    {yearOption.label} ({yearOption.entryCount})
-                  </option>
-                ))}
-              </select>
+                value={selectedYear ? String(selectedYear) : ""}
+                onChange={(value) => setSelectedYear(Number(value))}
+                options={yearOptions}
+                disabled={isImporting || isSubmitting || isSeeding || isClearing}
+                ariaLabel="Eurovision year"
+              />
             </div>
             <button
               type="button"
               onClick={handleImportYear}
-              disabled={isImporting || isSubmitting || isSeeding || !selectedYear}
+              disabled={isImporting || isSubmitting || isSeeding || isClearing || !selectedYear}
               className="btn-secondary"
             >
               {isImporting ? "Importing…" : "Import countries"}

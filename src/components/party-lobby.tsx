@@ -3,7 +3,7 @@
 import { ConfirmPanel } from "@/components/confirm-panel";
 import { EntryPicker } from "@/components/entry-picker";
 import { CountryFlag } from "@/components/country-flag";
-import { GuestFinalScoreboard } from "@/components/guest-final-scoreboard";
+import { Toast } from "@/components/toast";
 import { VoteBallot } from "@/components/vote-ballot";
 import { usePartySocket } from "@/hooks/use-party-socket";
 import { canRemoveParticipant, isPartyState, MIN_PARTY_ENTRIES } from "@/lib/party/constants";
@@ -15,7 +15,8 @@ import type {
 } from "@/lib/socket/party-events";
 import Link from "next/link";
 import { UserMinus } from "lucide-react";
-import { useCallback, useState } from "react";
+import { useRouter } from "next/navigation";
+import { useCallback, useEffect, useState } from "react";
 
 type PartyLobbyProps = {
   initialData: PartyOverviewResponse;
@@ -32,6 +33,7 @@ const STATE_LABELS: Record<string, string> = {
 };
 
 export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLobbyProps) {
+  const router = useRouter();
   const [data, setData] = useState(initialData);
   const partyCode = data.party.code;
   const partyId = data.party.id;
@@ -47,6 +49,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
   } | null>(null);
   const [pendingEditCountries, setPendingEditCountries] = useState(false);
   const [isEditingCountries, setIsEditingCountries] = useState(false);
+  const [copyToastOpen, setCopyToastOpen] = useState(false);
 
   const refresh = useCallback(async () => {
     const response = await fetch(`/api/parties/${partyCode}`);
@@ -134,6 +137,12 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
     onVoteSubmitted: applyVoteSubmitted,
   });
 
+  useEffect(() => {
+    if (data.party.state === "finished") {
+      router.replace(`/history/${partyCode}`);
+    }
+  }, [data.party.state, partyCode, router]);
+
   const joinPath = `/join/${data.party.code}`;
   const presentationPath = `/party/${partyCode}/presentation`;
 
@@ -143,7 +152,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
 
     try {
       await navigator.clipboard.writeText(`${window.location.origin}${joinPath}`);
-      setMessage("Join link copied.");
+      setCopyToastOpen(true);
     } catch {
       setError("Could not copy link.");
     }
@@ -306,15 +315,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
     canRemoveParticipant(data.party.state);
 
   if (data.party.state === "finished") {
-    return (
-      <section className="section-block space-y-6">
-        <div className="space-y-3 text-center">
-          <p className="eyebrow">Final results</p>
-          <h2 className="section-heading">The party is finished</h2>
-        </div>
-        <GuestFinalScoreboard partyCode={partyCode} partyId={partyId} />
-      </section>
-    );
+    return null;
   }
 
   return (
@@ -549,7 +550,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
               <span className="flex items-center gap-3">
                 <span className="text-sm text-muted">
                   {participant.hasVoted ? (
-                    <span className="text-success">Voted</span>
+                    <span className="text-gold-light">Voted</span>
                   ) : (
                     "Waiting"
                   )}
@@ -572,7 +573,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
       </section>
 
       {message ? (
-        <p role="status" className="text-center text-sm text-success">
+        <p role="status" className="text-center text-sm text-gold-light">
           {message}
         </p>
       ) : null}
@@ -581,6 +582,9 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
           {error}
         </p>
       ) : null}
+      {copyToastOpen ?
+        <Toast message="Join link copied" onDismiss={() => setCopyToastOpen(false)} />
+      : null}
     </>
   );
 }

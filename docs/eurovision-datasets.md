@@ -1,6 +1,6 @@
 # Eurovision year datasets (EUP-020)
 
-Year files live in [`data/eurovision/`](../data/eurovision/). **v1 ships the current year only** (`2026.json`).
+Year files live in [`data/eurovision/`](../data/eurovision/). Shipped datasets: **2026** (current), **2025**, **2024** Grand Finals.
 
 ## JSON schema
 
@@ -33,9 +33,11 @@ Year files live in [`data/eurovision/`](../data/eurovision/). **v1 ships the cur
 
 Loader: [`src/lib/eurovision/datasets.ts`](../src/lib/eurovision/datasets.ts)
 
+In Docker, year files are copied to `/app/eurovision-datasets` (outside the `/app/data` volume mount).
+
 ## API
 
 - `GET /api/eurovision/years` — list available datasets
 - `POST /api/parties/:code/entries/import-year` — host imports `{ "year": 2026 }` into a party (see EUP-021)
 
-Historical years are deferred until needed.
+Historical years are added manually as JSON when needed for party import.

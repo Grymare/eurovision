@@ -433,8 +433,11 @@ export function PresentationCeremony({
           <button type="button" className="btn-ghost" onClick={toggleFullscreen}>
             {isFullscreen ? "Exit fullscreen" : "Fullscreen"}
           </button>
-          <Link href={`/party/${partyCode}`} className="btn-secondary shrink-0">
-            Back to lobby
+          <Link
+            href={partyState === "finished" ? `/history/${partyCode}` : `/party/${partyCode}`}
+            className="btn-secondary shrink-0"
+          >
+            {partyState === "finished" ? "View results" : "Back to lobby"}
           </Link>
         </div>
       </div>
@@ -484,7 +487,7 @@ export function PresentationCeremony({
       : null}
 
       {partyState === "finished" ?
-        <p role="status" className="text-center text-sm text-success">
+        <p role="status" className="text-center text-sm text-gold-light">
           Presentation complete. Final results are saved.
         </p>
       : null}

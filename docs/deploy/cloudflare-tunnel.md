@@ -49,13 +49,9 @@ Then create DNS for the new hostname (once):
 cloudflared tunnel route dns <TUNNEL_UUID> eurovision.grymare.com
 ```
 
-Restart the Cloudflared Windows service (Admin PowerShell):
+Restart the tunnel connector (see **Keep cloudflared running on Windows** below).
 
-```powershell
-Restart-Service Cloudflared
-```
-
-Only one `cloudflared` service is needed — it can route multiple hostnames to different local ports.
+Only one `cloudflared` process is needed — it can route multiple hostnames to different local ports.
 
 Optional: copy [`deploy/cloudflared/config.yml.example`](../../deploy/cloudflared/config.yml.example) to a local path outside the repo, fill in your tunnel UUID and credentials path, and run the tunnel from that file.
 
@@ -75,10 +71,45 @@ After install, verify:
 cloudflared --version
 ```
 
-Run the connector using the command from the Cloudflare dashboard (typically installs a Windows service), or run manually:
+Run the connector manually for a quick test:
 
 ```powershell
-cloudflared tunnel run grymare-eurovision
+cloudflared tunnel run 68dc4207-a2dd-4f32-8906-19d2c658c6b5
+```
+
+Closing that terminal stops the tunnel. For party hosting, use the scheduled task below instead.
+
+## Keep cloudflared running on Windows
+
+The Cloudflared **Windows service** (`cloudflared service install`) often fails to connect on this setup: the service runs without your user config, and `C:\Program Files (x86)\cloudflared\config.yml` gets reset to a stub file.
+
+**Recommended:** a Scheduled Task that runs a small restart wrapper at logon and startup.
+
+1. Ensure `%USERPROFILE%\.cloudflared\config.yml` has your tunnel ID, credentials path, and ingress rules (see above).
+2. From the project root, register the task:
+
+```powershell
+.\deploy\register-cloudflared-task.ps1
+Start-ScheduledTask -TaskName "Grymare-Cloudflared"
+```
+
+The task uses a hidden launcher (`wscript.exe` + VBS) so **no console window** opens. Do not point the task directly at `cloudflared.exe` — that pops a terminal.
+
+3. Verify an active connector:
+
+```powershell
+cloudflared tunnel info 68dc4207-a2dd-4f32-8906-19d2c658c6b5
+```
+
+You should see at least one row under **CONNECTOR ID**. Logs: `%USERPROFILE%\.cloudflared\tunnel.log`.
+
+If the site shows Cloudflare Error 1033 (“no active connection”), the tunnel process is not running — start the task again with `Start-ScheduledTask -TaskName "Grymare-Cloudflared"`.
+
+To disable the broken Windows service (Admin PowerShell, one-time):
+
+```powershell
+Set-Service Cloudflared -StartupType Disabled
+Stop-Service Cloudflared -ErrorAction SilentlyContinue
 ```
 
 ## Run the app
@@ -136,8 +167,11 @@ You do **not** need 24/7 uptime unless you want the site always available.
 
 | Problem | What to try |
 |---------|-------------|
-| Site unreachable | Tunnel connector running? Docker running? `docker ps` shows port 3000? |
-| Service already installed | Use existing locally-managed tunnel — add ingress in `%USERPROFILE%\.cloudflared\config.yml` instead of `service install` |
+| Site unreachable / Error 1033 | Run `cloudflared tunnel info <TUNNEL_ID>` — need an active connector. Start task: `Start-ScheduledTask -TaskName "Grymare-Cloudflared"`. Check `%USERPROFILE%\.cloudflared\tunnel.log` |
+| Tunnel drops after closing terminal | Expected for manual `cloudflared tunnel run`. Use the scheduled task (`register-cloudflared-task.ps1`) so it survives logoff |
+| Task opens a console window | Re-run `register-cloudflared-task.ps1` — task must use `wscript.exe` + VBS, not `cloudflared.exe` directly |
+| Service already installed | Disable the Cloudflared Windows service; use locally-managed config in `%USERPROFILE%\.cloudflared\config.yml` + scheduled task |
+| Docker running? | `docker ps` shows port 3000 mapped |
 | 502 / error page | App not ready yet — wait for build, check `docker compose logs` |
 | Socket.io disconnected | Refresh page; confirm WebSocket works on health page; restart tunnel + app |
 | Session lost after login | App must run with `NODE_ENV=production` in Docker (secure cookies require HTTPS) |

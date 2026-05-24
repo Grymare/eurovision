@@ -28,6 +28,7 @@ MVP specs for Grymare Eurovision. See [kanban](../kanban.md) for board status.
 | [EUP-034](EUP-034.md) | Rate limiting & basic security |
 | [EUP-035](EUP-035.md) | Advanced responsive polish |
 | [EUP-038](EUP-038.md) | Current-year quick entry tool |
+| [EUP-041](EUP-041.md) | Forgotten password reset |
 
 ## Won't do (for now)
 

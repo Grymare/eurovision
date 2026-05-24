@@ -19,7 +19,15 @@ export type EurovisionEntry = z.infer<typeof eurovisionEntrySchema>;
 export type EurovisionYearDataset = z.infer<typeof eurovisionYearDatasetSchema>;
 
 function datasetsDirectory() {
-  return path.join(process.cwd(), "data", "eurovision");
+  const bundledPath = path.join(process.cwd(), "eurovision-datasets");
+  const localPath = path.join(process.cwd(), "data", "eurovision");
+
+  // Docker mounts a volume at /app/data, so bundled datasets live outside it.
+  if (fs.existsSync(bundledPath)) {
+    return bundledPath;
+  }
+
+  return localPath;
 }
 
 export function listEurovisionYears(): number[] {

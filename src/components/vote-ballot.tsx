@@ -200,7 +200,7 @@ export function VoteBallot({
       <div className="space-y-4">
         <div className="space-y-2">
           <h3 className="section-heading text-base">Your ballot</h3>
-          <p role="status" className="text-sm text-success">
+          <p role="status" className="text-sm text-gold-light">
             {votingLocked ?
               "Your vote is in. Ballots are locked."
             : "Your vote is in. Waiting for the rest of the jury."}

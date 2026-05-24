@@ -5,14 +5,18 @@ import path from "node:path";
 import * as schema from "./schema";
 
 const databasePath =
-  process.env.DATABASE_PATH ??
-  path.join(process.cwd(), "data", "app.db");
+  process.env.NEXT_PHASE === "phase-production-build" ?
+    ":memory:"
+  : (process.env.DATABASE_PATH ?? path.join(process.cwd(), "data", "app.db"));
 
-fs.mkdirSync(path.dirname(databasePath), { recursive: true });
+if (databasePath !== ":memory:") {
+  fs.mkdirSync(path.dirname(databasePath), { recursive: true });
+}
 
 const sqlite = new Database(databasePath);
 sqlite.pragma("journal_mode = WAL");
 sqlite.pragma("foreign_keys = ON");
+sqlite.pragma("busy_timeout = 5000");
 
 export const db = drizzle(sqlite, { schema });
 

@@ -231,7 +231,7 @@ export function ScoreboardVariationsShowcase() {
       </section>
 
       {choice ?
-        <p role="status" className="section-block text-center text-sm text-success">
+        <p role="status" className="section-block text-center text-sm text-gold-light">
           Current pick: <strong>{choice}</strong> — reply in chat with that letter (or a mix, e.g.
           &quot;H frame + E height&quot;) to continue implementation.
         </p>

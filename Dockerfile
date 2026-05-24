@@ -9,6 +9,7 @@ RUN pnpm install --frozen-lockfile
 RUN pnpm rebuild better-sqlite3
 
 FROM base AS builder
+ENV DATABASE_PATH=/tmp/build.db
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN pnpm build
@@ -28,7 +29,7 @@ COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/server.ts ./server.ts
 COPY --from=builder /app/src ./src
 COPY --from=builder /app/drizzle ./drizzle
-COPY --from=builder /app/data/eurovision ./data/eurovision
+COPY --from=builder /app/data/eurovision ./eurovision-datasets
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 RUN mkdir -p /app/data
 EXPOSE 3000

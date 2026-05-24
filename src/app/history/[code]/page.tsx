@@ -7,6 +7,11 @@ import {
   VoteOverviewMatrix,
 } from "@/components/vote-overview-matrix";
 import { auth } from "@/lib/auth";
+import {
+  getHostSessionToken,
+  getParticipantSessionToken,
+} from "@/lib/auth/cookies";
+import { AppError } from "@/lib/http/errors";
 import { assertCanViewFinishedPartyReplay } from "@/lib/party/history-access";
 import { getFinishedPartyReplay } from "@/lib/party/history";
 
@@ -25,11 +30,10 @@ function formatDate(iso: string) {
 
 export default async function HistoryPartyPage({ params }: HistoryPartyPageProps) {
   const session = await auth();
-
-  if (!session?.user) {
-    redirect("/auth/login?callbackUrl=/history");
-  }
-
+  const [participantToken, hostToken] = await Promise.all([
+    getParticipantSessionToken(),
+    getHostSessionToken(),
+  ]);
   const { code } = await params;
 
   let party;
@@ -37,10 +41,16 @@ export default async function HistoryPartyPage({ params }: HistoryPartyPageProps
   try {
     party = await assertCanViewFinishedPartyReplay({
       partyRef: code,
-      userId: session.user.id,
-      email: session.user.email,
+      userId: session?.user?.id,
+      email: session?.user?.email,
+      participantSessionToken: participantToken,
+      hostSessionToken: hostToken,
     });
-  } catch {
+  } catch (error) {
+    if (error instanceof AppError && error.code === "AUTH_REQUIRED") {
+      redirect(`/auth/login?callbackUrl=${encodeURIComponent(`/history/${code}`)}`);
+    }
+
     notFound();
   }
 

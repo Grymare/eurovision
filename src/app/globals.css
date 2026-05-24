@@ -13,7 +13,7 @@
   --gold-light: #d4af37;
   --gold-highlight: #f5e6c8;
   --on-gold: #14110a;
-  --success: #86efac;
+  --success: var(--gold-light);
   --danger: #fca5a5;
 
   --gold-gradient-text: linear-gradient(
@@ -466,6 +466,26 @@ body {
 
   .btn-danger {
     @apply inline-flex min-h-11 cursor-pointer items-center justify-center px-4 py-2 text-xs font-medium uppercase tracking-[0.14em] text-danger/90 transition-colors hover:bg-stage-elevated hover:text-danger focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-danger/50 disabled:cursor-not-allowed disabled:opacity-50;
+  }
+
+  .toast {
+    position: fixed;
+    bottom: 1.5rem;
+    left: 50%;
+    z-index: 50;
+    max-width: min(20rem, calc(100vw - 2rem));
+    transform: translateX(-50%);
+    border: 1px solid rgb(212 175 55 / 0.35);
+    background: rgb(14 14 14 / 0.96);
+    padding: 0.625rem 1rem;
+    text-align: center;
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.16em;
+    text-transform: uppercase;
+    color: var(--gold-highlight);
+    box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+    animation: toast-enter 180ms ease-out;
   }
 
   .gold-code {
@@ -1171,6 +1191,18 @@ body {
   }
 }
 
+@keyframes toast-enter {
+  from {
+    opacity: 0;
+    transform: translateX(-50%) translateY(0.5rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+  }
+}
+
 @keyframes sparkle-pulse {
   0% {
     opacity: 0;
@@ -1307,6 +1339,7 @@ body {
     animation: none;
   }
 
+  .toast,
   .sb-var__round:not(.sb-var__round--empty),
   .sb-var__gold-sweep,
   .sb-var__glitter,

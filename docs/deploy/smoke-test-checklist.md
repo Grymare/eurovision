@@ -74,7 +74,7 @@ Run after auth, history, stats, and year-import changes are deployed.
 
 - [ ] Logged-out user cannot create a party (home hides host section)
 - [ ] Register with email/password; sign in
-- [ ] Google sign-in works for an **existing** account email
+- [ ] Google sign-in redirects back to `https://eurovision.grymare.com` (not localhost)
 - [ ] Non-admin logged-in user cannot create a party
 - [ ] Admin (`ADMIN_EMAILS`) can create a party and is auto-joined as host
 
@@ -82,10 +82,11 @@ Run after auth, history, stats, and year-import changes are deployed.
 
 - [ ] New party starts in **lobby** (no separate “open lobby” step)
 - [ ] Copy join link enabled once **10+ countries** are set
-- [ ] **Import from Eurovision** fills countries (2026 dataset)
+- [ ] **Import from Eurovision** year dropdown lists 2026 / 2025 / 2024; import fills countries
 - [ ] Host can **Edit countries**; going back from voting clears votes (confirm panel)
 - [ ] Guests see ballot through **Presentation** state (not full-screen takeover)
-- [ ] Ballot order runs **12 → 1**
+- [ ] Finish party → lobby and presentation **View results** go to `/history/[code]`
+- [ ] **Copy join link** shows gold toast (not green)
 
 ## History & replay
 

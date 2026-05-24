@@ -3,6 +3,7 @@ import { toErrorResponse } from "@/lib/http/errors";
 import { parseJsonBody } from "@/lib/http/validation";
 import {
   addEntry,
+  clearAllEntries,
   listEntries,
   requireHostParty,
   resolvePartyRef,
@@ -51,6 +52,22 @@ export async function POST(request: Request, context: RouteContext) {
     await broadcastVotingStatus(party.id);
 
     return NextResponse.json({ entry: serializeEntry(entry) }, { status: 201 });
+  } catch (error) {
+    return toErrorResponse(error);
+  }
+}
+
+export async function DELETE(request: Request, context: RouteContext) {
+  try {
+    const { code } = await context.params;
+    const hostToken = await getHostSessionToken();
+    const party = await requireHostParty(hostToken, code);
+    const clearVotes = new URL(request.url).searchParams.get("clearVotes") === "true";
+
+    await clearAllEntries(party, { clearVotes });
+    await broadcastVotingStatus(party.id);
+
+    return NextResponse.json({ cleared: true });
   } catch (error) {
     return toErrorResponse(error);
   }

@@ -11,6 +11,9 @@
       PORT: 3000
       NODE_ENV: production
       DATABASE_PATH: /app/data/app.db
+      # Override localhost values from .env.local when running Docker for production hosting.
+      AUTH_URL: https://eurovision.grymare.com
+      PUBLIC_APP_URL: https://eurovision.grymare.com
     volumes:
       - app-data:/app/data
     restart: unless-stopped

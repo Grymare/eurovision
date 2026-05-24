@@ -1,4 +1,4 @@
-# Kanban board
+﻿# Kanban board
 
 GitHub Projects-style board for Grymare Eurovision. Columns: **Backlog** → **Ready** → **In Progress** → **Review** → **Done**.
 
@@ -57,6 +57,7 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`, `deferred`
 | [EUP-034](tickets/EUP-034.md) | Rate limiting & basic security | `phase-3`, `feature` |
 | [EUP-035](tickets/EUP-035.md) | Advanced responsive polish | `phase-3`, `feature` |
 | [EUP-038](tickets/EUP-038.md) | Current-year quick entry tool | `phase-3`, `feature` |
+| [EUP-041](tickets/EUP-041.md) | Forgotten password reset | `phase-3`, `feature` |
 
 ## Won't do (for now)
 
