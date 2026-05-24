@@ -1,5 +1,6 @@
+import { auth } from "@/lib/auth";
 import { setParticipantSessionCookie } from "@/lib/auth/cookies";
-import { toErrorResponse } from "@/lib/http/errors";
+import { AppError, toErrorResponse } from "@/lib/http/errors";
 import { parseJsonBody } from "@/lib/http/validation";
 import {
   joinParty,
@@ -12,13 +13,28 @@ import { z } from "zod";
 
 const joinPartySchema = z.object({
   code: z.string().trim().min(4).max(8),
-  nickname: z.string().trim().min(2).max(24),
+  nickname: z.string().trim().min(2).max(24).optional(),
 });
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
     const body = parseJsonBody(joinPartySchema, await request.json());
-    const result = await joinParty(body);
+
+    const nickname =
+      session?.user?.name?.trim() ||
+      body.nickname?.trim() ||
+      "";
+
+    if (!nickname) {
+      throw new AppError("Nickname is required", 400, "INVALID_NICKNAME");
+    }
+
+    const result = await joinParty({
+      code: body.code,
+      nickname,
+      userId: session?.user?.id,
+    });
 
     await setParticipantSessionCookie(result.participantSessionToken);
     await broadcastVotingStatus(result.party.id);

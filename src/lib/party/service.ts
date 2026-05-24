@@ -11,17 +11,18 @@ import {
   type VoteAllocations,
 } from "@/db/schema";
 import { findCountryCatalogEntry } from "@/lib/countries/catalog";
+import { loadEurovisionYear } from "@/lib/eurovision/datasets";
 import { AppError } from "@/lib/http/errors";
 import {
   canEditEntries,
   canJoinParty,
   canRemoveParticipant,
   joinPartyBlockedMessage,
-  MIN_BALLOT_ENTRIES,
+  MIN_PARTY_ENTRIES,
+  joinPartyNeedsMoreEntriesMessage,
   type PartyState,
 } from "@/lib/party/constants";
 import { EUROVISION_2026_ENTRY_SET, getMockEntrySet } from "@/lib/party/mock-data";
-import type { MockPartyEntry } from "@/lib/party/mock-data/types";
 import { buildRandomDevBallotAllocations } from "@/lib/party/dev-ballot";
 import {
   applyAllocationsToTotals,
@@ -167,9 +168,56 @@ export async function countEntries(partyId: string) {
   return result?.value ?? 0;
 }
 
+export async function partyHasVotes(partyId: string) {
+  const [result] = await db
+    .select({ value: count() })
+    .from(votes)
+    .where(eq(votes.partyId, partyId))
+    .all();
+
+  return (result?.value ?? 0) > 0;
+}
+
+export function clearPartyVotes(partyId: string) {
+  db.delete(votes).where(eq(votes.partyId, partyId)).run();
+  db.update(participants)
+    .set({ hasVoted: false })
+    .where(eq(participants.partyId, partyId))
+    .run();
+}
+
+export function clearPresentationState(partyId: string) {
+  db.update(parties)
+    .set({ revealOrderJson: null, updatedAt: nowIso() })
+    .where(eq(parties.id, partyId))
+    .run();
+}
+
+async function requireEntryEditAllowed(party: Party, clearVotes?: boolean) {
+  if (!canEditEntries(party.state)) {
+    throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
+  }
+
+  const hasVotes = await partyHasVotes(party.id);
+
+  if (hasVotes && !clearVotes) {
+    throw new AppError(
+      "Submitted votes must be cleared before editing countries. Confirm to continue.",
+      409,
+      "VOTES_EXIST",
+    );
+  }
+
+  if (hasVotes && clearVotes) {
+    clearPartyVotes(party.id);
+    clearPresentationState(party.id);
+  }
+}
+
 export async function createParty(input: {
   hostNickname: string;
   title?: string;
+  userId?: string;
 }) {
   const nickname = input.hostNickname.trim();
 
@@ -196,7 +244,7 @@ export async function createParty(input: {
       id: partyId,
       code,
       title: input.title?.trim() || null,
-      state: "draft",
+      state: "lobby",
       hostSessionToken,
       hostParticipantId,
     })
@@ -207,6 +255,7 @@ export async function createParty(input: {
       id: hostParticipantId,
       partyId,
       nickname,
+      userId: input.userId ?? null,
       sessionToken: participantSessionToken,
       isHost: true,
     })
@@ -232,17 +281,10 @@ export async function createDevQuickStartParty(input: {
   mockSetId?: string;
 }) {
   const result = await createParty(input);
-  let party = result.party;
+  const party = result.party;
   const mockSetId = input.mockSetId ?? EUROVISION_2026_ENTRY_SET.id;
 
   await seedMockEntries(party, mockSetId);
-
-  const lobbyParty = await updatePartyState(party, "lobby");
-  if (!lobbyParty) {
-    throw new AppError("Failed to open lobby", 500, "PARTY_STATE_UPDATE_FAILED");
-  }
-
-  party = lobbyParty;
 
   const votingParty = await updatePartyState(party, "voting_open");
   if (!votingParty) {
@@ -304,7 +346,7 @@ export async function createDevScoreboardFixtureParty(input: {
   const entries = await listEntries(party.id);
   const entryIds = entries.map((entry) => entry.id);
 
-  if (entryIds.length < MIN_BALLOT_ENTRIES) {
+  if (entryIds.length < MIN_PARTY_ENTRIES) {
     throw new AppError("Not enough countries for mock ballots", 500, "DEV_FIXTURE_FAILED");
   }
 
@@ -366,7 +408,11 @@ export async function createDevScoreboardFixtureParty(input: {
   };
 }
 
-export async function joinParty(input: { code: string; nickname: string }) {
+export async function joinParty(input: {
+  code: string;
+  nickname: string;
+  userId?: string;
+}) {
   const party = await getPartyByCode(input.code.trim());
 
   if (!party) {
@@ -375,6 +421,12 @@ export async function joinParty(input: { code: string; nickname: string }) {
 
   if (!canJoinParty(party.state)) {
     throw new AppError(joinPartyBlockedMessage(party.state), 409, "PARTY_CLOSED");
+  }
+
+  const entryCount = await countEntries(party.id);
+
+  if (entryCount < MIN_PARTY_ENTRIES) {
+    throw new AppError(joinPartyNeedsMoreEntriesMessage(entryCount), 409, "NOT_ENOUGH_ENTRIES");
   }
 
   const nickname = input.nickname.trim();
@@ -392,6 +444,7 @@ export async function joinParty(input: { code: string; nickname: string }) {
         id: participantId,
         partyId: party.id,
         nickname,
+        userId: input.userId ?? null,
         sessionToken,
         isHost: false,
       })
@@ -411,11 +464,11 @@ export async function joinParty(input: { code: string; nickname: string }) {
 
 export async function updatePartyState(party: Party, nextState: PartyState) {
   const allowed: Record<PartyState, PartyState[]> = {
-    draft: ["lobby"],
-    lobby: ["voting_open", "draft"],
-    voting_open: ["voting_closed"],
-    voting_closed: ["presenting", "voting_open"],
-    presenting: ["finished"],
+    draft: ["voting_open"],
+    lobby: ["voting_open"],
+    voting_open: ["voting_closed", "lobby"],
+    voting_closed: ["presenting", "voting_open", "lobby"],
+    presenting: ["finished", "voting_closed"],
     finished: [],
   };
 
@@ -427,11 +480,19 @@ export async function updatePartyState(party: Party, nextState: PartyState) {
     );
   }
 
+  if (nextState === "lobby") {
+    clearPresentationState(party.id);
+  }
+
+  if (nextState === "voting_closed" && party.state === "presenting") {
+    clearPresentationState(party.id);
+  }
+
   if (nextState === "voting_open") {
     const entryCount = await countEntries(party.id);
-    if (entryCount < MIN_BALLOT_ENTRIES) {
+    if (entryCount < MIN_PARTY_ENTRIES) {
       throw new AppError(
-        `Add at least ${MIN_BALLOT_ENTRIES} countries before opening voting`,
+        `Add at least ${MIN_PARTY_ENTRIES} countries before starting voting`,
         409,
         "NOT_ENOUGH_ENTRIES",
       );
@@ -457,10 +518,9 @@ export async function updatePartyState(party: Party, nextState: PartyState) {
 export async function addEntry(
   party: Party,
   input: { name: string; flagEmoji?: string },
+  options: { clearVotes?: boolean } = {},
 ) {
-  if (!canEditEntries(party.state)) {
-    throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
-  }
+  await requireEntryEditAllowed(party, options.clearVotes);
 
   const catalogEntry = findCountryCatalogEntry(input.name);
 
@@ -511,45 +571,75 @@ function normalizeEntryName(name: string) {
   return name.trim().toLocaleLowerCase();
 }
 
-export async function seedMockEntries(
+async function bulkImportEntries(
   party: Party,
-  setId: string,
-  options: { skipExisting?: boolean } = {},
+  sourceEntries: Array<{ name: string; flagEmoji?: string }>,
+  options: { skipExisting?: boolean; clearVotes?: boolean } = {},
 ) {
-  if (!canEditEntries(party.state)) {
-    throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
-  }
-
-  const mockSet = getMockEntrySet(setId);
-  if (!mockSet) {
-    throw new AppError("Unknown mock entry set", 400, "UNKNOWN_MOCK_ENTRY_SET");
-  }
+  await requireEntryEditAllowed(party, options.clearVotes);
 
   const skipExisting = options.skipExisting ?? true;
   const existingEntries = await listEntries(party.id);
   const existingNames = new Set(existingEntries.map((entry) => normalizeEntryName(entry.name)));
 
-  const toAdd: MockPartyEntry[] = [];
-  for (const mockEntry of mockSet.entries) {
-    const normalizedName = normalizeEntryName(mockEntry.name);
+  const toAdd: Array<{ name: string; flagEmoji?: string }> = [];
+  for (const sourceEntry of sourceEntries) {
+    const normalizedName = normalizeEntryName(sourceEntry.name);
     if (skipExisting && existingNames.has(normalizedName)) {
       continue;
     }
-    toAdd.push(mockEntry);
+    toAdd.push(sourceEntry);
     existingNames.add(normalizedName);
   }
 
   const addedEntries = [];
-  for (const mockEntry of toAdd) {
-    addedEntries.push(await addEntry(party, mockEntry));
+  for (const sourceEntry of toAdd) {
+    addedEntries.push(await addEntry(party, sourceEntry));
   }
+
+  return {
+    added: addedEntries.length,
+    skipped: sourceEntries.length - addedEntries.length,
+    entries: await listEntries(party.id),
+  };
+}
+
+export async function importYearEntries(
+  party: Party,
+  year: number,
+  options: { skipExisting?: boolean; clearVotes?: boolean } = {},
+) {
+  const dataset = loadEurovisionYear(year);
+
+  if (!dataset) {
+    throw new AppError(`No Eurovision dataset for ${year}`, 404, "YEAR_NOT_FOUND");
+  }
+
+  const result = await bulkImportEntries(party, dataset.entries, options);
+
+  return {
+    year: dataset.year,
+    label: dataset.label,
+    ...result,
+  };
+}
+
+export async function seedMockEntries(
+  party: Party,
+  setId: string,
+  options: { skipExisting?: boolean; clearVotes?: boolean } = {},
+) {
+  const mockSet = getMockEntrySet(setId);
+  if (!mockSet) {
+    throw new AppError("Unknown mock entry set", 400, "UNKNOWN_MOCK_ENTRY_SET");
+  }
+
+  const result = await bulkImportEntries(party, [...mockSet.entries], options);
 
   return {
     setId: mockSet.id,
     label: mockSet.label,
-    added: addedEntries.length,
-    skipped: mockSet.entries.length - addedEntries.length,
-    entries: await listEntries(party.id),
+    ...result,
   };
 }
 
@@ -557,10 +647,9 @@ export async function updateEntry(
   party: Party,
   entryId: string,
   input: { name?: string; flagEmoji?: string },
+  options: { clearVotes?: boolean } = {},
 ) {
-  if (!canEditEntries(party.state)) {
-    throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
-  }
+  await requireEntryEditAllowed(party, options.clearVotes);
 
   const entry = await db.query.partyEntries.findFirst({
     where: and(eq(partyEntries.id, entryId), eq(partyEntries.partyId, party.id)),
@@ -587,10 +676,12 @@ export async function updateEntry(
   });
 }
 
-export async function deleteEntry(party: Party, entryId: string) {
-  if (!canEditEntries(party.state)) {
-    throw new AppError("Entries cannot be edited in the current party state", 409, "ENTRIES_LOCKED");
-  }
+export async function deleteEntry(
+  party: Party,
+  entryId: string,
+  options: { clearVotes?: boolean } = {},
+) {
+  await requireEntryEditAllowed(party, options.clearVotes);
 
   const result = db
     .delete(partyEntries)

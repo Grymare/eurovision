@@ -1,4 +1,4 @@
-﻿# Kanban board
+# Kanban board
 
 GitHub Projects-style board for Grymare Eurovision. Columns: **Backlog** → **Ready** → **In Progress** → **Review** → **Done**.
 
@@ -29,6 +29,13 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`, `deferred`
 | [EUP-019](tickets/EUP-019.md) | Eurovision dual-column scoreboard | `mvp`, `feature` |
 | [EUP-007A](tickets/EUP-007A.md) | Responsive layout foundation | `mvp`, `feature` |
 | [EUP-007B](tickets/EUP-007B.md) | WCAG 2.2 AA baseline | `mvp`, `feature` |
+| [EUP-005](tickets/EUP-005.md) | Optional account auth | `phase-2`, `feature` |
+| [EUP-029](tickets/EUP-029.md) | Admin-only party creation | `phase-2`, `feature` |
+| [EUP-020](tickets/EUP-020.md) | Eurovision year JSON datasets | `phase-2`, `chore` |
+| [EUP-021](tickets/EUP-021.md) | Import party from year | `phase-2`, `feature` |
+| [EUP-024](tickets/EUP-024.md) | Party history list | `phase-2`, `feature` |
+| [EUP-025](tickets/EUP-025.md) | Party detail replay | `phase-2`, `feature` |
+| [EUP-026](tickets/EUP-026.md) | Cross-party stats | `phase-2`, `feature` |
 
 ## Review
 
@@ -41,20 +48,6 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`, `deferred`
 ## Ready
 
 *(empty)*
-
-### Phase 2
-
-| ID | Title | Labels |
-|----|-------|--------|
-| [EUP-005](tickets/EUP-005.md) | Optional account auth | `phase-2`, `feature` |
-| [EUP-029](tickets/EUP-029.md) | Admin-only party creation | `phase-2`, `feature` |
-| [EUP-020](tickets/EUP-020.md) | Eurovision year JSON datasets | `phase-2`, `chore` |
-| [EUP-021](tickets/EUP-021.md) | Import party from year | `phase-2`, `feature` |
-| [EUP-024](tickets/EUP-024.md) | Party history list | `phase-2`, `feature` |
-| [EUP-025](tickets/EUP-025.md) | Party detail replay | `phase-2`, `feature` |
-| [EUP-026](tickets/EUP-026.md) | Cross-party stats | `phase-2`, `feature` |
-
-**Build order:** EUP-005 + EUP-029 → EUP-020 + EUP-021 → EUP-024 + EUP-025 + EUP-026
 
 ### Phase 3
 

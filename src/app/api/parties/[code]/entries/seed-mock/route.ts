@@ -14,6 +14,7 @@ import { z } from "zod";
 
 const seedSchema = z.object({
   setId: z.string().trim().min(1).default(EUROVISION_2026_ENTRY_SET.id),
+  clearVotes: z.boolean().optional(),
 });
 
 type RouteContext = {
@@ -28,7 +29,7 @@ export async function POST(request: Request, context: RouteContext) {
     const hostToken = await getHostSessionToken();
     const party = await requireHostParty(hostToken, code);
     const body = parseJsonBody(seedSchema, await request.json().catch(() => ({})));
-    const result = await seedMockEntries(party, body.setId);
+    const result = await seedMockEntries(party, body.setId, { clearVotes: body.clearVotes });
 
     await broadcastVotingStatus(party.id);
 

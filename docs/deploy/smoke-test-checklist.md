@@ -63,3 +63,47 @@ Run this after Cloudflare Tunnel hosting is configured. Test at **https://eurovi
 | Date | Tester | Result | Notes |
 |------|--------|--------|-------|
 | | | Pass / Fail | |
+
+---
+
+# Phase 2 smoke test checklist
+
+Run after auth, history, stats, and year-import changes are deployed.
+
+## Auth & admin
+
+- [ ] Logged-out user cannot create a party (home hides host section)
+- [ ] Register with email/password; sign in
+- [ ] Google sign-in works for an **existing** account email
+- [ ] Non-admin logged-in user cannot create a party
+- [ ] Admin (`ADMIN_EMAILS`) can create a party and is auto-joined as host
+
+## Party flow (Phase 2 updates)
+
+- [ ] New party starts in **lobby** (no separate “open lobby” step)
+- [ ] Copy join link enabled once **10+ countries** are set
+- [ ] **Import from Eurovision** fills countries (2026 dataset)
+- [ ] Host can **Edit countries**; going back from voting clears votes (confirm panel)
+- [ ] Guests see ballot through **Presentation** state (not full-screen takeover)
+- [ ] Ballot order runs **12 → 1**
+
+## History & replay
+
+- [ ] Signed-in user opens **History** — finished parties listed (no party codes on cards)
+- [ ] Party replay shows **dual-column scoreboard** (same style as presentation)
+- [ ] **Points-by-jury matrix** visible between scoreboard and accordion
+- [ ] **Jury ballots** accordion expands to show full breakdown
+- [ ] Guest only sees parties they joined while signed in; admin sees all
+
+## Stats
+
+- [ ] **Stats** page loads for signed-in users
+- [ ] Country leaderboard shows wins / points / douze with correct singular (**1 win**)
+- [ ] Personal accordion: top countries by **total points given**
+- [ ] Admin **Regular jurors** list: compact accordion rows, top 10 countries when expanded
+
+## Sign-off (Phase 2)
+
+| Date | Tester | Result | Notes |
+|------|--------|--------|-------|
+| | | Pass / Fail | |

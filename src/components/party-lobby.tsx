@@ -1,11 +1,12 @@
 "use client";
 
+import { ConfirmPanel } from "@/components/confirm-panel";
 import { EntryPicker } from "@/components/entry-picker";
 import { CountryFlag } from "@/components/country-flag";
 import { GuestFinalScoreboard } from "@/components/guest-final-scoreboard";
 import { VoteBallot } from "@/components/vote-ballot";
 import { usePartySocket } from "@/hooks/use-party-socket";
-import { canRemoveParticipant, isPartyState, MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
+import { canRemoveParticipant, isPartyState, MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import type { PartyOverviewResponse } from "@/lib/party/types";
 import type { SerializedVote } from "@/lib/party/types";
 import type {
@@ -22,8 +23,8 @@ type PartyLobbyProps = {
 };
 
 const STATE_LABELS: Record<string, string> = {
-  draft: "Draft",
-  lobby: "Lobby open",
+  draft: "Lobby",
+  lobby: "Lobby",
   voting_open: "Voting open",
   voting_closed: "Voting closed",
   presenting: "Presentation",
@@ -38,6 +39,14 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
   const [error, setError] = useState<string | null>(null);
   const [isUpdating, setIsUpdating] = useState(false);
   const [removingParticipantId, setRemovingParticipantId] = useState<string | null>(null);
+  const [pendingStateChange, setPendingStateChange] = useState<{
+    nextState: string;
+    title: string;
+    message: string;
+    confirmLabel: string;
+  } | null>(null);
+  const [pendingEditCountries, setPendingEditCountries] = useState(false);
+  const [isEditingCountries, setIsEditingCountries] = useState(false);
 
   const refresh = useCallback(async () => {
     const response = await fetch(`/api/parties/${partyCode}`);
@@ -177,6 +186,7 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
   }
 
   async function updateState(nextState: string) {
+    setPendingStateChange(null);
     setIsUpdating(true);
     setError(null);
     setMessage(null);
@@ -193,6 +203,14 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
         throw new Error(result.error ?? "Could not update party state");
       }
 
+      if (nextState === "lobby") {
+        setIsEditingCountries(false);
+      }
+
+      if (nextState === "voting_open") {
+        setIsEditingCountries(false);
+      }
+
       await refresh();
       setMessage(`Now: ${STATE_LABELS[nextState] ?? nextState}.`);
     } catch (updateError) {
@@ -206,31 +224,86 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
     }
   }
 
+  function requestStateChange(
+    nextState: string,
+    confirmation?: {
+      title: string;
+      message: string;
+      confirmLabel?: string;
+    },
+  ) {
+    if (confirmation) {
+      setPendingStateChange({
+        nextState,
+        title: confirmation.title,
+        message: confirmation.message,
+        confirmLabel: confirmation.confirmLabel ?? "Continue",
+      });
+      return;
+    }
+
+    void updateState(nextState);
+  }
+
+  const hasSubmittedVotes = data.participants.some((participant) => participant.hasVoted);
+
+  async function confirmEditCountries() {
+    setIsUpdating(true);
+    setError(null);
+    setMessage(null);
+
+    try {
+      if (hasSubmittedVotes) {
+        const response = await fetch(`/api/parties/${partyCode}/votes/reset`, {
+          method: "POST",
+        });
+        const result = await response.json();
+
+        if (!response.ok) {
+          throw new Error(result.error ?? "Could not clear submitted votes");
+        }
+      }
+
+      setPendingEditCountries(false);
+      setIsEditingCountries(true);
+      await refresh();
+    } catch (editError) {
+      setError(
+        editError instanceof Error ? editError.message : "Could not edit countries",
+      );
+    } finally {
+      setIsUpdating(false);
+    }
+  }
+
+  function requestEditCountries() {
+    if (hasSubmittedVotes) {
+      setPendingEditCountries(true);
+      return;
+    }
+
+    setIsEditingCountries(true);
+  }
+
+  const inSetupPhase = data.party.state === "draft" || data.party.state === "lobby";
+  const autoEditCountries = inSetupPhase && data.entries.length === 0;
+
   const canEditEntries =
-    data.viewer.isHost &&
-    (data.party.state === "draft" || data.party.state === "lobby");
+    data.viewer.isHost && inSetupPhase && (isEditingCountries || autoEditCountries);
+
+  const showCountryList = inSetupPhase;
 
   const showBallot =
     data.viewer.participant &&
-    (data.party.state === "voting_open" || data.party.state === "voting_closed");
+    (data.party.state === "voting_open" ||
+      data.party.state === "voting_closed" ||
+      data.party.state === "presenting");
   const votingLocked = data.party.state !== "voting_open";
 
   const canRemoveJuryMembers =
     data.viewer.isHost &&
     isPartyState(data.party.state) &&
     canRemoveParticipant(data.party.state);
-
-  if (data.party.state === "presenting" && !data.viewer.isHost) {
-    return (
-      <section className="section-block space-y-4 text-center">
-        <h2 className="section-heading">Presentation in progress</h2>
-        <p className="text-muted">
-          The host is revealing votes on the presentation screen. Final results will appear here
-          when the show is over.
-        </p>
-      </section>
-    );
-  }
 
   if (data.party.state === "finished") {
     return (
@@ -260,7 +333,12 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
               {data.party.code}
             </p>
             {data.viewer.isHost ?
-              <button type="button" onClick={copyJoinLink} className="btn-secondary shrink-0">
+              <button
+                type="button"
+                onClick={copyJoinLink}
+                disabled={data.entries.length < MIN_PARTY_ENTRIES}
+                className="btn-secondary shrink-0"
+              >
                 Copy join link
               </button>
             : null}
@@ -288,34 +366,73 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
           <h2 id="host-controls-heading" className="section-heading">
             Host controls
           </h2>
+          {pendingStateChange ?
+            <ConfirmPanel
+              title={pendingStateChange.title}
+              message={pendingStateChange.message}
+              confirmLabel={pendingStateChange.confirmLabel}
+              isBusy={isUpdating}
+              onConfirm={() => updateState(pendingStateChange.nextState)}
+              onCancel={() => setPendingStateChange(null)}
+            />
+          : pendingEditCountries ?
+            <ConfirmPanel
+              title="Clear submitted votes?"
+              message="Editing countries will delete all submitted votes."
+              confirmLabel="Yes, edit countries"
+              isBusy={isUpdating}
+              onConfirm={() => confirmEditCountries()}
+              onCancel={() => setPendingEditCountries(false)}
+            />
+          : <>
           <div className="flex flex-wrap items-center gap-3">
-            {data.party.state === "draft" ?
-              <button
-                type="button"
-                disabled={isUpdating}
-                onClick={() => updateState("lobby")}
-                className="btn-primary"
-              >
-                Open lobby
-              </button>
-            : data.party.state === "lobby" ?
-              <button
-                type="button"
-                disabled={isUpdating || data.entries.length < MIN_BALLOT_ENTRIES}
-                onClick={() => updateState("voting_open")}
-                className="btn-primary"
-              >
-                Start voting
-              </button>
+            {data.party.state === "draft" || data.party.state === "lobby" ?
+              <>
+                <button
+                  type="button"
+                  disabled={isUpdating || data.entries.length < MIN_PARTY_ENTRIES}
+                  onClick={() => updateState("voting_open")}
+                  className="btn-primary"
+                >
+                  Start voting
+                </button>
+                {!isEditingCountries && data.entries.length > 0 ?
+                  <button
+                    type="button"
+                    disabled={isUpdating}
+                    onClick={requestEditCountries}
+                    className="btn-secondary"
+                  >
+                    Edit countries
+                  </button>
+                : null}
+              </>
             : data.party.state === "voting_open" ?
-              <button
-                type="button"
-                disabled={isUpdating}
-                onClick={() => updateState("voting_closed")}
-                className="btn-primary"
-              >
-                Close voting
-              </button>
+              <>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() => updateState("voting_closed")}
+                  className="btn-primary"
+                >
+                  Close voting
+                </button>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() =>
+                    requestStateChange("lobby", {
+                      title: "Back to setup?",
+                      message:
+                        "Return to setup? Use Edit countries when you are ready to change the list.",
+                      confirmLabel: "Yes, go back",
+                    })
+                  }
+                  className="btn-secondary"
+                >
+                  Back to setup
+                </button>
+              </>
             : data.party.state === "voting_closed" ?
               <>
                 <Link href={presentationPath} className="btn-primary">
@@ -329,21 +446,53 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
                 >
                   Reopen voting
                 </button>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() =>
+                    requestStateChange("lobby", {
+                      title: "Back to setup?",
+                      message:
+                        "Return to setup? Use Edit countries when you are ready to change the list.",
+                      confirmLabel: "Yes, go back",
+                    })
+                  }
+                  className="btn-secondary"
+                >
+                  Back to setup
+                </button>
               </>
             : data.party.state === "presenting" ?
-              <Link href={presentationPath} className="btn-primary">
-                Return to presentation
-              </Link>
+              <>
+                <Link href={presentationPath} className="btn-primary">
+                  Return to presentation
+                </Link>
+                <button
+                  type="button"
+                  disabled={isUpdating}
+                  onClick={() =>
+                    requestStateChange("voting_closed", {
+                      title: "Back to closed voting?",
+                      message: "Presentation progress will be reset.",
+                      confirmLabel: "Yes, go back",
+                    })
+                  }
+                  className="btn-secondary"
+                >
+                  Back to closed voting
+                </button>
+              </>
             : null}
           </div>
-          {data.party.state === "lobby" &&
-          data.entries.length < MIN_BALLOT_ENTRIES ? (
+          {(data.party.state === "draft" || data.party.state === "lobby") &&
+          data.entries.length < MIN_PARTY_ENTRIES ?
             <p className="text-sm text-muted">
-              Add {MIN_BALLOT_ENTRIES - data.entries.length} more{" "}
-              {MIN_BALLOT_ENTRIES - data.entries.length === 1 ? "country" : "countries"}{" "}
-              before voting (need {MIN_BALLOT_ENTRIES} for a full ballot).
+              Add {MIN_PARTY_ENTRIES - data.entries.length} more{" "}
+              {MIN_PARTY_ENTRIES - data.entries.length === 1 ? "country" : "countries"}{" "}
+              before guests can join and voting can start (need {MIN_PARTY_ENTRIES}).
             </p>
-          ) : null}
+          : null}
+          </>}
         </section>
       ) : null}
 
@@ -360,29 +509,29 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
         </section>
       ) : null}
 
-      {data.viewer.isHost ? (
-        <EntryPicker
-          partyCode={partyCode}
-          initialEntries={data.entries}
-          canEdit={canEditEntries}
-          devMockDataEnabled={devMockDataEnabled}
-          onChange={refresh}
-        />
-      ) : (
-        <section className="section-block">
-          <h2 className="section-heading">Countries</h2>
-          <ul className="mt-4">
-            {data.entries.map((entry) => (
-              <li key={entry.id} className="list-row">
-                <span className="flex items-center gap-3">
-                  <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
-                  <span>{entry.name}</span>
-                </span>
-              </li>
-            ))}
-          </ul>
-        </section>
-      )}
+      {showCountryList ?
+        data.viewer.isHost ?
+          <EntryPicker
+            partyCode={partyCode}
+            initialEntries={data.entries}
+            canEdit={canEditEntries}
+            devMockDataEnabled={devMockDataEnabled}
+            onChange={refresh}
+          />
+        : <section className="section-block">
+            <h2 className="section-heading">Countries</h2>
+            <ul className="mt-4">
+              {data.entries.map((entry) => (
+                <li key={entry.id} className="list-row">
+                  <span className="flex items-center gap-3">
+                    <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
+                    <span>{entry.name}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          </section>
+      : null}
 
       <section aria-labelledby="participants-heading" className="section-block">
         <h2 id="participants-heading" className="section-heading">

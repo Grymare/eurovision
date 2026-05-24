@@ -15,6 +15,7 @@ import { z } from "zod";
 const entrySchema = z.object({
   name: z.string().trim().min(1).max(80),
   flagEmoji: z.string().trim().min(1).max(8).optional(),
+  clearVotes: z.boolean().optional(),
 });
 
 type RouteContext = {
@@ -41,7 +42,11 @@ export async function POST(request: Request, context: RouteContext) {
     const hostToken = await getHostSessionToken();
     const party = await requireHostParty(hostToken, code);
     const body = parseJsonBody(entrySchema, await request.json());
-    const entry = await addEntry(party, body);
+    const entry = await addEntry(
+      party,
+      { name: body.name, flagEmoji: body.flagEmoji },
+      { clearVotes: body.clearVotes },
+    );
 
     await broadcastVotingStatus(party.id);
 

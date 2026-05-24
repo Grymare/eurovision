@@ -1,9 +1,7 @@
 export const PARTY_CODE_LENGTH = 6;
 
-export const MIN_PARTY_ENTRIES = 5;
-
-/** Each jury assigns 10 point slots — need at least this many countries to vote. */
-export const MIN_BALLOT_ENTRIES = 10;
+/** Minimum countries required to join a party, run a ballot, and start voting. */
+export const MIN_PARTY_ENTRIES = 10;
 
 export const EUROVISION_POINT_VALUES = [1, 2, 3, 4, 5, 6, 7, 8, 10, 12] as const;
 
@@ -34,13 +32,11 @@ export function canRemoveParticipant(state: PartyState): boolean {
 }
 
 export function canJoinParty(state: PartyState): boolean {
-  return state === "lobby" || state === "voting_open";
+  return state === "draft" || state === "lobby" || state === "voting_open";
 }
 
 export function joinPartyBlockedMessage(state: PartyState): string {
   switch (state) {
-    case "draft":
-      return "The host hasn't opened the lobby yet.";
     case "voting_closed":
       return "Voting is closed — new guests can't join.";
     case "presenting":
@@ -50,4 +46,12 @@ export function joinPartyBlockedMessage(state: PartyState): string {
     default:
       return "You can't join this party right now.";
   }
+}
+
+export function joinPartyNeedsMoreEntriesMessage(entryCount: number): string {
+  const remaining = MIN_PARTY_ENTRIES - entryCount;
+
+  return `The host is still setting up — ${remaining} more ${
+    remaining === 1 ? "country is" : "countries are"
+  } needed before guests can join (need at least ${MIN_PARTY_ENTRIES}).`;
 }

@@ -5,12 +5,18 @@ import { useRouter } from "next/navigation";
 
 type JoinPartyFormProps = {
   initialCode?: string;
+  loggedInDisplayName?: string;
+  isLoggedIn?: boolean;
 };
 
-export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
+export function JoinPartyForm({
+  initialCode = "",
+  loggedInDisplayName,
+  isLoggedIn = false,
+}: JoinPartyFormProps) {
   const router = useRouter();
   const [code, setCode] = useState(initialCode);
-  const [nickname, setNickname] = useState("");
+  const [nickname, setNickname] = useState(loggedInDisplayName ?? "");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -23,7 +29,10 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
       const response = await fetch("/api/parties/join", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ code, nickname }),
+        body: JSON.stringify({
+          code,
+          nickname: isLoggedIn && loggedInDisplayName ? loggedInDisplayName : nickname,
+        }),
       });
 
       const data = await response.json();
@@ -54,7 +63,9 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
           Join a party
         </h2>
         <p className="text-sm leading-6 text-muted">
-          Enter the code from your host and choose a unique nickname.
+          {isLoggedIn && loggedInDisplayName ?
+            "Enter the party code — we will use your account display name."
+          : "Enter the code from your host and choose a unique nickname."}
         </p>
       </div>
 
@@ -75,22 +86,28 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
         />
       </div>
 
-      <div className="space-y-2">
-        <label htmlFor="guest-nickname" className="field-label">
-          Your nickname
-        </label>
-        <input
-          id="guest-nickname"
-          name="nickname"
-          type="text"
-          required
-          minLength={2}
-          maxLength={24}
-          value={nickname}
-          onChange={(event) => setNickname(event.target.value)}
-          className="field-input"
-        />
-      </div>
+      {isLoggedIn && loggedInDisplayName ?
+        <p className="text-sm text-muted">
+          Joining as{" "}
+          <span className="text-foreground">{loggedInDisplayName}</span>
+        </p>
+      : <div className="space-y-2">
+          <label htmlFor="guest-nickname" className="field-label">
+            Your nickname
+          </label>
+          <input
+            id="guest-nickname"
+            name="nickname"
+            type="text"
+            required
+            minLength={2}
+            maxLength={24}
+            value={nickname}
+            onChange={(event) => setNickname(event.target.value)}
+            className="field-input"
+          />
+        </div>
+      }
 
       {error ? (
         <p role="alert" className="text-sm text-danger">
@@ -98,7 +115,7 @@ export function JoinPartyForm({ initialCode = "" }: JoinPartyFormProps) {
         </p>
       ) : null}
 
-      <button type="submit" disabled={isSubmitting} className="btn-secondary">
+      <button type="submit" disabled={isSubmitting} className="btn-primary">
         {isSubmitting ? "Joining…" : "Join party"}
       </button>
     </form>

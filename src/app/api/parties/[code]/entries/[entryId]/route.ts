@@ -14,6 +14,7 @@ import { z } from "zod";
 const updateEntrySchema = z.object({
   name: z.string().trim().min(1).max(80).optional(),
   flagEmoji: z.string().trim().min(1).max(8).optional(),
+  clearVotes: z.boolean().optional(),
 });
 
 type RouteContext = {
@@ -26,7 +27,12 @@ export async function PATCH(request: Request, context: RouteContext) {
     const hostToken = await getHostSessionToken();
     const party = await requireHostParty(hostToken, code);
     const body = parseJsonBody(updateEntrySchema, await request.json());
-    const entry = await updateEntry(party, entryId, body);
+    const entry = await updateEntry(
+      party,
+      entryId,
+      { name: body.name, flagEmoji: body.flagEmoji },
+      { clearVotes: body.clearVotes },
+    );
 
     if (!entry) {
       return NextResponse.json({ error: "Entry not found" }, { status: 404 });
@@ -40,12 +46,13 @@ export async function PATCH(request: Request, context: RouteContext) {
   }
 }
 
-export async function DELETE(_request: Request, context: RouteContext) {
+export async function DELETE(request: Request, context: RouteContext) {
   try {
     const { code, entryId } = await context.params;
     const hostToken = await getHostSessionToken();
     const party = await requireHostParty(hostToken, code);
-    await deleteEntry(party, entryId);
+    const clearVotes = new URL(request.url).searchParams.get("clearVotes") === "true";
+    await deleteEntry(party, entryId, { clearVotes });
     await broadcastVotingStatus(party.id);
 
     return NextResponse.json({ ok: true });

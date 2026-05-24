@@ -3,9 +3,13 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 
-export function CreatePartyForm() {
+type CreatePartyFormProps = {
+  defaultHostNickname?: string;
+};
+
+export function CreatePartyForm({ defaultHostNickname = "" }: CreatePartyFormProps) {
   const router = useRouter();
-  const [hostNickname, setHostNickname] = useState("");
+  const [hostNickname, setHostNickname] = useState(defaultHostNickname);
   const [title, setTitle] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);

@@ -2,7 +2,7 @@
 
 import { CountrySelect } from "@/components/country-select";
 import { CountryFlag } from "@/components/country-flag";
-import { MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
+import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import { buildDevBallotAllocations } from "@/lib/party/dev-ballot";
 import type { VoteAllocations } from "@/db/schema";
 import type { SerializedVote } from "@/lib/party/types";
@@ -77,7 +77,7 @@ function BallotSummary({
 
   return (
     <ol className="mt-4 space-y-2">
-      {[...BALLOT_POINT_ORDER].reverse().map((points) => {
+      {BALLOT_POINT_ORDER.map((points) => {
         const entryId = slots[points];
         const entry = entryId ? entryById.get(entryId) : null;
 
@@ -111,6 +111,7 @@ export function VoteBallot({
 }: VoteBallotProps) {
   const [mode, setMode] = useState<BallotMode>(() => initialMode(initialVote));
   const [slots, setSlots] = useState(() => initialSlots(initialVote));
+  const [submittedSlots, setSubmittedSlots] = useState(() => initialSlots(initialVote));
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasSubmittedVote = Boolean(initialVote?.hasVoted);
@@ -151,6 +152,7 @@ export function VoteBallot({
       };
 
       setSlots(slotsFromAllocations(allocations));
+      setSubmittedSlots(slotsFromAllocations(allocations));
       setMode("waiting");
       onSubmitted?.(submittedVote);
     } catch (submitError) {
@@ -171,7 +173,7 @@ export function VoteBallot({
     const allocations = buildDevBallotAllocations(entries.map((entry) => entry.id));
 
     if (!allocations) {
-      setError(`Need at least ${MIN_BALLOT_ENTRIES} countries for a dev ballot.`);
+      setError(`Need at least ${MIN_PARTY_ENTRIES} countries for a dev ballot.`);
       return;
     }
 
@@ -179,10 +181,10 @@ export function VoteBallot({
     await submitAllocations(allocations);
   }
 
-  if (entries.length < MIN_BALLOT_ENTRIES) {
+  if (entries.length < MIN_PARTY_ENTRIES) {
     return (
       <p className="text-sm text-muted">
-        Waiting for at least {MIN_BALLOT_ENTRIES} countries before ballots open.
+        Waiting for at least {MIN_PARTY_ENTRIES} countries before ballots open.
       </p>
     );
   }
@@ -221,6 +223,10 @@ export function VoteBallot({
   if (mode === "confirm-edit") {
     return (
       <div className="space-y-4" role="dialog" aria-labelledby="confirm-edit-heading">
+        <div className="space-y-2">
+          <h3 className="section-heading text-base">Current vote</h3>
+          <BallotSummary slots={submittedSlots} entries={entries} />
+        </div>
         <h3 id="confirm-edit-heading" className="section-heading text-base">
           Edit your vote?
         </h3>
@@ -228,7 +234,14 @@ export function VoteBallot({
           You will replace your current ballot. This only affects your own scores.
         </p>
         <div className="flex flex-wrap gap-3">
-          <button type="button" className="btn-primary" onClick={() => setMode("editing")}>
+          <button
+            type="button"
+            className="btn-primary"
+            onClick={() => {
+              setSlots(submittedSlots);
+              setMode("editing");
+            }}
+          >
             Yes, edit ballot
           </button>
           <button type="button" className="btn-secondary" onClick={() => setMode("waiting")}>
@@ -239,11 +252,13 @@ export function VoteBallot({
     );
   }
 
+  const isEditingSubmittedVote = hasSubmittedVote && mode === "editing";
+
   return (
     <form onSubmit={handleSubmit} className="space-y-5" aria-labelledby="ballot-heading">
       <div className="space-y-2">
         <h3 id="ballot-heading" className="section-heading">
-          Your ballot
+          {isEditingSubmittedVote ? "Edit your vote" : "Your ballot"}
         </h3>
         <p className="text-sm leading-6 text-muted">
           Assign 1, 2, 3, 4, 5, 6, 7, 8, 10, and 12 points to ten different countries.
@@ -288,8 +303,26 @@ export function VoteBallot({
 
       <div className="flex flex-wrap gap-3">
         <button type="submit" disabled={isSubmitting} className="btn-primary">
-          {isSubmitting ? "Submitting…" : "Submit vote"}
+          {isSubmitting ?
+            "Submitting…"
+          : isEditingSubmittedVote ?
+            "Save changes"
+          : "Submit vote"}
         </button>
+
+        {isEditingSubmittedVote ?
+          <button
+            type="button"
+            disabled={isSubmitting}
+            className="btn-secondary"
+            onClick={() => {
+              setSlots(submittedSlots);
+              setMode("waiting");
+            }}
+          >
+            Cancel
+          </button>
+        : null}
 
         {devMockDataEnabled ?
           <button

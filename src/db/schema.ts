@@ -1,12 +1,64 @@
-﻿import { sql } from "drizzle-orm";
+import { sql } from "drizzle-orm";
 import {
   index,
   integer,
+  primaryKey,
   sqliteTable,
   text,
   uniqueIndex,
 } from "drizzle-orm/sqlite-core";
 import type { PartyState } from "@/lib/party/constants";
+
+export const users = sqliteTable("user", {
+  id: text("id")
+    .primaryKey()
+    .$defaultFn(() => crypto.randomUUID()),
+  name: text("name"),
+  email: text("email").notNull().unique(),
+  emailVerified: integer("emailVerified", { mode: "timestamp_ms" }),
+  image: text("image"),
+  passwordHash: text("password_hash"),
+});
+
+export const accounts = sqliteTable(
+  "account",
+  {
+    userId: text("userId")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    type: text("type").notNull(),
+    provider: text("provider").notNull(),
+    providerAccountId: text("providerAccountId").notNull(),
+    refresh_token: text("refresh_token"),
+    access_token: text("access_token"),
+    expires_at: integer("expires_at"),
+    token_type: text("token_type"),
+    scope: text("scope"),
+    id_token: text("id_token"),
+    session_state: text("session_state"),
+  },
+  (table) => [
+    primaryKey({ columns: [table.provider, table.providerAccountId] }),
+  ],
+);
+
+export const sessions = sqliteTable("session", {
+  sessionToken: text("sessionToken").primaryKey(),
+  userId: text("userId")
+    .notNull()
+    .references(() => users.id, { onDelete: "cascade" }),
+  expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+});
+
+export const verificationTokens = sqliteTable(
+  "verificationToken",
+  {
+    identifier: text("identifier").notNull(),
+    token: text("token").notNull(),
+    expires: integer("expires", { mode: "timestamp_ms" }).notNull(),
+  },
+  (table) => [primaryKey({ columns: [table.identifier, table.token] })],
+);
 
 export const appMeta = sqliteTable("app_meta", {
   key: text("key").primaryKey(),
@@ -22,7 +74,7 @@ export const parties = sqliteTable(
     id: text("id").primaryKey(),
     code: text("code").notNull(),
     title: text("title"),
-    state: text("state").$type<PartyState>().notNull().default("draft"),
+    state: text("state").$type<PartyState>().notNull().default("lobby"),
     hostSessionToken: text("host_session_token").notNull(),
     hostParticipantId: text("host_participant_id"),
     revealOrderJson: text("reveal_order_json"),
@@ -68,6 +120,7 @@ export const participants = sqliteTable(
       .notNull()
       .references(() => parties.id, { onDelete: "cascade" }),
     nickname: text("nickname").notNull(),
+    userId: text("user_id").references(() => users.id, { onDelete: "set null" }),
     sessionToken: text("session_token").notNull(),
     isHost: integer("is_host", { mode: "boolean" }).notNull().default(false),
     hasVoted: integer("has_voted", { mode: "boolean" }).notNull().default(false),
@@ -128,6 +181,11 @@ export const partyResults = sqliteTable(
   },
   (table) => [uniqueIndex("party_results_party_id_unique").on(table.partyId)],
 );
+
+export type User = typeof users.$inferSelect;
+export type Account = typeof accounts.$inferSelect;
+export type Session = typeof sessions.$inferSelect;
+export type VerificationToken = typeof verificationTokens.$inferSelect;
 
 export type Party = typeof parties.$inferSelect;
 export type PartyEntry = typeof partyEntries.$inferSelect;

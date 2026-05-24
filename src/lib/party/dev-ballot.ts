@@ -1,5 +1,5 @@
 import type { VoteAllocations } from "@/db/schema";
-import { EUROVISION_POINT_VALUES, MIN_BALLOT_ENTRIES } from "@/lib/party/constants";
+import { EUROVISION_POINT_VALUES, MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 
 function shuffleEntryIds(entryIds: string[]): string[] {
   const shuffled = [...entryIds];
@@ -17,7 +17,7 @@ export function buildDevBallotAllocations(
   entryIds: string[],
   rotation = 0,
 ): VoteAllocations | null {
-  if (entryIds.length < MIN_BALLOT_ENTRIES) {
+  if (entryIds.length < MIN_PARTY_ENTRIES) {
     return null;
   }
 
@@ -34,7 +34,7 @@ export function buildDevBallotAllocations(
 
 /** Random country assignment per point slot — used for dev scoreboard fixtures. */
 export function buildRandomDevBallotAllocations(entryIds: string[]): VoteAllocations | null {
-  if (entryIds.length < MIN_BALLOT_ENTRIES) {
+  if (entryIds.length < MIN_PARTY_ENTRIES) {
     return null;
   }
 

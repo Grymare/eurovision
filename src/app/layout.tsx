@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
+import { AuthSessionProvider } from "@/components/auth/session-provider";
 import { SiteHeader } from "@/components/site-header";
 import { StageBackground } from "@/components/stage-background";
 import "./globals.css";
@@ -32,8 +33,10 @@ export default function RootLayout({
         </a>
         <StageBackground />
         <div className="page-shell">
-          <SiteHeader />
-          {children}
+          <AuthSessionProvider>
+            <SiteHeader />
+            {children}
+          </AuthSessionProvider>
         </div>
       </body>
     </html>

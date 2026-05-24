@@ -6,7 +6,15 @@ import { findCountryCatalogEntry } from "@/lib/countries/catalog";
 import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import type { SerializedEntry } from "@/lib/party/types";
 import { Trash2 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+type EurovisionYearSummary = {
+  year: number;
+  label: string;
+  hostCity: string | null;
+  entryCount: number;
+  source: "manual" | "api";
+};
 
 type EntryPickerProps = {
   partyCode: string;
@@ -28,8 +36,70 @@ export function EntryPicker({
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSeeding, setIsSeeding] = useState(false);
+  const [isImporting, setIsImporting] = useState(false);
+  const [availableYears, setAvailableYears] = useState<EurovisionYearSummary[]>([]);
+  const [selectedYear, setSelectedYear] = useState<number | "">("");
   const showEntryMinimumHint = canEdit;
   const showEntryCount = entries.length < MIN_PARTY_ENTRIES;
+
+  useEffect(() => {
+    if (!canEdit) {
+      return;
+    }
+
+    let cancelled = false;
+
+    void fetch("/api/eurovision/years")
+      .then((response) => response.json())
+      .then((data: { years?: EurovisionYearSummary[] }) => {
+        if (cancelled) {
+          return;
+        }
+
+        const years = data.years ?? [];
+        setAvailableYears(years);
+        setSelectedYear((current) => current || years[0]?.year || "");
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setAvailableYears([]);
+        }
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, [canEdit]);
+
+  async function handleImportYear() {
+    if (!selectedYear) {
+      return;
+    }
+
+    setIsImporting(true);
+    setError(null);
+
+    try {
+      const response = await fetch(`/api/parties/${partyCode}/entries/import-year`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ year: selectedYear }),
+      });
+      const data = await response.json();
+
+      if (!response.ok) {
+        throw new Error(data.error ?? "Could not import Eurovision countries");
+      }
+
+      onChange?.();
+    } catch (importError) {
+      setError(
+        importError instanceof Error ? importError.message : "Could not import Eurovision countries",
+      );
+    } finally {
+      setIsImporting(false);
+    }
+  }
 
   async function handleAdd(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -114,7 +184,11 @@ export function EntryPicker({
           </h2>
           {showEntryMinimumHint ?
             <p className="mt-1 text-sm text-muted">
-              At least {MIN_PARTY_ENTRIES} entries before voting opens.
+              At least {MIN_PARTY_ENTRIES} countries before guests can join and voting can start.
+            </p>
+          : !canEdit && entries.length > 0 ?
+            <p className="mt-1 text-sm text-muted">
+              Use Edit countries in host controls to change this list.
             </p>
           : null}
         </div>
@@ -149,6 +223,48 @@ export function EntryPicker({
           ))}
         </ul>
       )}
+
+      {canEdit && availableYears.length > 0 ?
+        <div className="space-y-3 border-t border-stage-border pt-5">
+          <div className="space-y-2">
+            <h3 className="text-sm font-medium uppercase tracking-[0.16em] text-foreground">
+              Import from Eurovision
+            </h3>
+            <p className="text-sm text-muted">
+              Pre-fill the country list from a year dataset. Existing countries with the same name
+              are skipped.
+            </p>
+          </div>
+          <div className="flex flex-wrap items-end gap-3">
+            <div className="min-w-[12rem] flex-1 space-y-2">
+              <label htmlFor="import-year" className="field-label">
+                Year
+              </label>
+              <select
+                id="import-year"
+                value={selectedYear}
+                onChange={(event) => setSelectedYear(Number(event.target.value))}
+                className="field-input"
+                disabled={isImporting || isSubmitting || isSeeding}
+              >
+                {availableYears.map((yearOption) => (
+                  <option key={yearOption.year} value={yearOption.year}>
+                    {yearOption.label} ({yearOption.entryCount})
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              type="button"
+              onClick={handleImportYear}
+              disabled={isImporting || isSubmitting || isSeeding || !selectedYear}
+              className="btn-secondary"
+            >
+              {isImporting ? "Importing…" : "Import countries"}
+            </button>
+          </div>
+        </div>
+      : null}
 
       {canEdit && devMockDataEnabled ?
         <div className="border-t border-stage-border pt-5">

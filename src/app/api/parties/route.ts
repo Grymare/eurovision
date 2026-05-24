@@ -1,8 +1,10 @@
+import { auth } from "@/lib/auth";
+import { isSiteAdmin } from "@/lib/auth/admin";
 import {
   setHostSessionCookie,
   setParticipantSessionCookie,
 } from "@/lib/auth/cookies";
-import { toErrorResponse } from "@/lib/http/errors";
+import { AppError, toErrorResponse } from "@/lib/http/errors";
 import { parseJsonBody } from "@/lib/http/validation";
 import {
   createParty,
@@ -19,8 +21,20 @@ const createPartySchema = z.object({
 
 export async function POST(request: Request) {
   try {
+    const session = await auth();
+
+    if (!isSiteAdmin(session?.user?.email)) {
+      throw new AppError("Only the site admin can create parties", 403, "ADMIN_REQUIRED");
+    }
+
     const body = parseJsonBody(createPartySchema, await request.json());
-    const result = await createParty(body);
+    const hostNickname = body.hostNickname || session?.user?.name?.trim() || "";
+
+    const result = await createParty({
+      hostNickname,
+      title: body.title,
+      userId: session?.user?.id,
+    });
 
     await setHostSessionCookie(result.hostSessionToken);
     await setParticipantSessionCookie(result.participantSessionToken);

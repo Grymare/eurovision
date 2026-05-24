@@ -1,12 +1,10 @@
 import Link from "next/link";
+import { SignOutButton } from "@/components/auth/sign-out-button";
+import { auth } from "@/lib/auth";
 
-const NAV_ITEMS = [
-  { href: "/", label: "Home" },
-  { href: "/#host", label: "Host" },
-  { href: "/#join", label: "Join" },
-] as const;
+export async function SiteHeader() {
+  const session = await auth();
 
-export function SiteHeader() {
   return (
     <header className="site-header">
       <div className="site-header__inner">
@@ -14,11 +12,28 @@ export function SiteHeader() {
           Grymare Eurovision
         </Link>
         <nav aria-label="Main" className="site-nav">
-          {NAV_ITEMS.map((item) => (
-            <Link key={item.href} href={item.href} className="nav-link">
-              {item.label}
-            </Link>
-          ))}
+          {session?.user ?
+            <>
+              <Link href="/history" className="nav-link">
+                History
+              </Link>
+              <Link href="/stats" className="nav-link">
+                Stats
+              </Link>
+              <span className="hidden text-[0.62rem] uppercase tracking-[0.18em] text-muted sm:inline">
+                {session.user.name ?? session.user.email}
+              </span>
+              <SignOutButton />
+            </>
+          : <>
+              <Link href="/auth/login" className="nav-link">
+                Sign in
+              </Link>
+              <Link href="/auth/register" className="nav-link">
+                Register
+              </Link>
+            </>
+          }
         </nav>
       </div>
     </header>

@@ -1,4 +1,7 @@
 import { JoinPartyForm } from "@/components/join-party-form";
+import { auth } from "@/lib/auth";
+
+export const dynamic = "force-dynamic";
 
 export default async function JoinPage({
   params,
@@ -6,6 +9,8 @@ export default async function JoinPage({
   params: Promise<{ code: string }>;
 }) {
   const { code } = await params;
+  const session = await auth();
+  const displayName = session?.user?.name?.trim() ?? "";
 
   return (
     <main id="main-content" className="page-main section-stack max-w-md">
@@ -19,7 +24,11 @@ export default async function JoinPage({
           </span>
         </p>
       </header>
-      <JoinPartyForm initialCode={code.toUpperCase()} />
+      <JoinPartyForm
+        initialCode={code.toUpperCase()}
+        loggedInDisplayName={displayName || undefined}
+        isLoggedIn={Boolean(session?.user)}
+      />
     </main>
   );
 }
