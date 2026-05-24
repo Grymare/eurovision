@@ -86,12 +86,33 @@ cloudflared tunnel run grymare-eurovision
 From the project root:
 
 ```powershell
-docker compose up --build
+git pull
+docker compose up --build -d
 ```
 
 The app listens on `http://localhost:3000`. The tunnel forwards `https://eurovision.grymare.com` to that port.
 
-Data persists in the Docker volume `app-data` (SQLite at `/app/data/app.db` inside the container).
+Data persists in the Docker volume `app-data` (SQLite at `/app/data/app.db` inside the container). On startup the container runs **Drizzle migrations** automatically (auth tables, etc.).
+
+### Phase 2 environment (required for auth)
+
+Copy [`.env.example`](../.env.example) to `.env.local` in the project root (gitignored). Docker Compose loads it via `env_file`. Set at minimum:
+
+| Variable | Purpose |
+|----------|---------|
+| `AUTH_SECRET` | Session signing — generate per `.env.example` |
+| `AUTH_URL` | `https://eurovision.grymare.com` |
+| `PUBLIC_APP_URL` | Same — used for join links |
+| `ADMIN_EMAILS` | Comma-separated admin emails (party creation) |
+| `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Optional Google sign-in |
+
+Add the Google OAuth redirect URI in Google Cloud Console:
+
+```text
+https://eurovision.grymare.com/api/auth/callback/google
+```
+
+After changing `.env.local`, rebuild: `docker compose up --build -d`
 
 ## Verify
 
@@ -104,10 +125,10 @@ Data persists in the Docker volume `app-data` (SQLite at `/app/data/app.db` insi
 ## Party-night workflow
 
 1. Disable PC sleep for the evening (Settings → System → Power).
-2. Start Docker: `docker compose up --build`
+2. Pull latest and start Docker: `git pull` then `docker compose up --build -d`
 3. Ensure the tunnel connector is running (service or manual `cloudflared tunnel run …`).
-4. Share join links from the lobby — they use `https://eurovision.grymare.com/join/<code>`.
-5. When finished, stop Docker (`Ctrl+C`) and optionally stop the tunnel service.
+4. Sign in as admin if hosting; share join links from the lobby.
+5. When finished, stop Docker (`docker compose down`) and optionally stop the tunnel service.
 
 You do **not** need 24/7 uptime unless you want the site always available.
 

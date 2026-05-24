@@ -3,9 +3,13 @@
     build: .
     ports:
       - "3000:3000"
+    env_file:
+      - path: .env.local
+        required: false
     environment:
       HOSTNAME: 0.0.0.0
       PORT: 3000
+      NODE_ENV: production
       DATABASE_PATH: /app/data/app.db
     volumes:
       - app-data:/app/data

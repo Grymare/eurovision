@@ -43,7 +43,8 @@ Copy [`.env.example`](.env.example) to `.env.local` for local overrides.
 | `pnpm build` | Production Next.js build |
 | `pnpm start` | Run production server |
 | `pnpm lint` | ESLint (includes jsx-a11y) |
-| `pnpm db:push` | Apply Drizzle schema to SQLite |
+| `pnpm db:push` | Apply Drizzle schema to SQLite (local dev) |
+| `pnpm db:migrate` | Run SQL migrations (matches Docker startup) |
 | `pnpm db:generate` | Generate SQL migrations |
 
 ## Public hosting (primary)
@@ -54,9 +55,12 @@ Host from your Windows PC via Cloudflare Tunnel — no router port forwarding, f
    Full guide: [docs/deploy/cloudflare-tunnel.md](docs/deploy/cloudflare-tunnel.md)
 2. **Party night:**
    ```bash
-   docker compose up --build
+   git pull
+   docker compose up --build -d
    ```
-3. Ensure `cloudflared` connector is running; share join links from the lobby.
+3. Ensure `cloudflared` connector is running; sign in as admin to host, share join links from the lobby.
+
+Copy [`.env.example`](.env.example) to `.env.local` for auth and admin settings (Docker loads it automatically). See [docs/auth.md](docs/auth.md).
 
 Config template: [deploy/cloudflared/config.yml.example](deploy/cloudflared/config.yml.example)
 
@@ -87,6 +91,6 @@ Find your IP: `ipconfig` (Windows). Allow port 3000 through the firewall if need
 
 GitHub CLI (`gh`) is not required locally. To mirror tickets in GitHub Issues + Projects, create a repo and import titles from `docs/tickets/`.
 
-## MVP build order
+## Build order
 
-See `docs/kanban.md` for the full backlog. Next up after hosting: **EUP-017 — MVP smoke test checklist**.
+See `docs/kanban.md` for the full backlog. **Phase 2** (auth, history, stats) is complete. **Phase 3** is next: Pi guide, rate limiting, responsive polish.
