@@ -123,7 +123,14 @@ docker compose up --build -d
 
 The app listens on `http://localhost:3000`. The tunnel forwards `https://eurovision.grymare.com` to that port.
 
-Data persists in the Docker volume `app-data` (SQLite at `/app/data/app.db` inside the container). On startup the container runs **Drizzle migrations** automatically (auth tables, etc.).
+Data persists in Docker volumes:
+
+| Volume | Mount | Purpose |
+|--------|-------|---------|
+| `app-data` | `/app/data` | SQLite database |
+| `eurovision-datasets-data` | `/app/eurovision-datasets` | Eurovision year JSON catalogs (admin-editable via `/admin/datasets`) |
+
+On first run, year datasets are copied from the image seed into `eurovision-datasets-data`. Updating datasets in the admin UI does **not** require `docker compose up --build`.
 
 ### Phase 2 environment (required for auth)
 
@@ -136,6 +143,18 @@ Copy [`.env.example`](../.env.example) to `.env.local` in the project root (giti
 | `PUBLIC_APP_URL` | Same — used for join links |
 | `ADMIN_EMAILS` | Comma-separated admin emails (party creation) |
 | `AUTH_GOOGLE_ID` / `AUTH_GOOGLE_SECRET` | Optional Google sign-in |
+| `EMAIL_SERVER` / `EMAIL_FROM` | Optional SMTP — enables **magic link** and **password reset** on login |
+
+**Magic link** and **forgot password** stay hidden until both `EMAIL_SERVER` and `EMAIL_FROM` are set. Docker loads `.env.local` via `env_file`.
+
+Example ([Resend](https://resend.com) SMTP — verify `grymare.com` in Resend first):
+
+```env
+EMAIL_SERVER=smtp://resend:re_YOUR_API_KEY@smtp.resend.com:587
+EMAIL_FROM=Grymare Eurovision <noreply@grymare.com>
+```
+
+SendGrid / Mailgun use the same pattern: provider SMTP host, username, and password/API key in `EMAIL_SERVER`, verified sender in `EMAIL_FROM`. URL-encode special characters in the password if needed.
 
 Add the Google OAuth redirect URI in Google Cloud Console:
 
@@ -143,7 +162,7 @@ Add the Google OAuth redirect URI in Google Cloud Console:
 https://eurovision.grymare.com/api/auth/callback/google
 ```
 
-After changing `.env.local`, rebuild: `docker compose up --build -d`
+After changing `.env.local`, restart: `docker compose up -d` (add `--build` only when app code changed).
 
 ## Verify
 
@@ -177,6 +196,8 @@ You do **not** need 24/7 uptime unless you want the site always available.
 | Session lost after login | App must run with `NODE_ENV=production` in Docker (secure cookies require HTTPS) |
 | Dev buttons missing | Expected — dev fixtures only run when `NODE_ENV=development` |
 
+See also [security.md](security.md) for rate limits and Cloudflare bot protection.
+
 ## LAN fallback
 
 If the tunnel or internet fails during a party, friends on the **same Wi‑Fi** can use:
@@ -189,13 +210,7 @@ Find your IP: `ipconfig` → IPv4 address. Allow port 3000 through Windows Firew
 
 ## Raspberry Pi (later)
 
-Same steps on Pi:
-
-1. Copy the repo / Docker image to the Pi.
-2. `docker compose up --build`
-3. Run `cloudflared` on the Pi (move the tunnel connector from PC to Pi in Cloudflare, or create a new connector on Pi).
-
-See **EUP-030** (Phase 3) for a dedicated Pi guide.
+Same Docker + Cloudflare Tunnel pattern on Pi OS. See [docs/deploy/raspberry-pi.md](raspberry-pi.md).
 
 ## Environment variables
 

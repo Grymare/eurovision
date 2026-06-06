@@ -1,4 +1,5 @@
 import { CountryFlag } from "@/components/country-flag";
+import { resolveCountryIsoCode } from "@/lib/countries/resolve-iso-code";
 
 export type VoteOverviewJury = {
   id: string;
@@ -28,6 +29,18 @@ function juryLabel(jury: VoteOverviewJury) {
   }
 
   return trimmed.slice(0, 3);
+}
+
+function countryIsoCode(country: Pick<VoteOverviewCountry, "name" | "flagEmoji">) {
+  return (
+    resolveCountryIsoCode(country) ??
+    country.name
+      .split(/\s+/)
+      .map((part) => part[0])
+      .join("")
+      .slice(0, 2)
+      .toUpperCase()
+  );
 }
 
 function cellClassName(points: number | null) {
@@ -76,7 +89,7 @@ export function VoteOverviewMatrix({ countries, juries }: VoteOverviewMatrixProp
                 <span className="sr-only">Rank</span>
               </th>
               <th scope="col" className="vote-matrix__th vote-matrix__th--country">
-                Country
+                <span className="sr-only">Country</span>
               </th>
               {juries.map((jury) => (
                 <th
@@ -99,9 +112,14 @@ export function VoteOverviewMatrix({ countries, juries }: VoteOverviewMatrixProp
                 <th scope="row" className="vote-matrix__rank">
                   {String(country.rank).padStart(2, "0")}
                 </th>
-                <td className="vote-matrix__country">
-                  <CountryFlag name={country.name} flagEmoji={country.flagEmoji} />
-                  <span>{country.name}</span>
+                <td className="vote-matrix__country" title={country.name}>
+                  <CountryFlag
+                    name={country.name}
+                    flagEmoji={country.flagEmoji}
+                    className="vote-matrix__country-flag"
+                  />
+                  <span className="vote-matrix__country-code">{countryIsoCode(country)}</span>
+                  <span className="sr-only">{country.name}</span>
                 </td>
                 {juries.map((jury) => {
                   const points = country.juryPoints[jury.id] ?? null;

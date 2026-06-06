@@ -1,4 +1,5 @@
 import { DesignNav } from "@/components/design/design-nav";
+import "@/components/design/scoreboard-variants.css";
 import { isDevMockDataEnabled } from "@/lib/dev/mock-data";
 import { notFound } from "next/navigation";
 

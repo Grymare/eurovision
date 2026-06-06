@@ -1,4 +1,4 @@
-﻿# Kanban board
+# Kanban board
 
 GitHub Projects-style board for Grymare Eurovision. Columns: **Backlog** → **Ready** → **In Progress** → **Review** → **Done**.
 
@@ -36,6 +36,13 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`, `deferred`
 | [EUP-024](tickets/EUP-024.md) | Party history list | `phase-2`, `feature` |
 | [EUP-025](tickets/EUP-025.md) | Party detail replay | `phase-2`, `feature` |
 | [EUP-026](tickets/EUP-026.md) | Cross-party stats | `phase-2`, `feature` |
+| [EUP-034](tickets/EUP-034.md) | Rate limiting & basic security | `phase-3`, `feature` |
+| [EUP-041](tickets/EUP-041.md) | Forgotten password reset | `phase-3`, `feature` |
+| [EUP-038](tickets/EUP-038.md) | Current-year quick entry tool | `phase-3`, `feature` |
+| [EUP-035](tickets/EUP-035.md) | Advanced responsive polish | `phase-3`, `feature` |
+| [EUP-044](tickets/EUP-044.md) | Searchable country combobox in ballot | `phase-3`, `feature` |
+| [EUP-046](tickets/EUP-046.md) | Pre-vote ranking & favorite finders | `phase-3`, `feature` |
+| [EUP-043](tickets/EUP-043.md) | Import legacy party results | `phase-3`, `feature`, `chore` |
 
 ## Review
 
@@ -49,15 +56,17 @@ Labels: `mvp`, `phase-2`, `phase-3`, `infra`, `feature`, `chore`, `deferred`
 
 *(empty)*
 
-### Phase 3
+### Phase 3 (backlog)
 
 | ID | Title | Labels |
 |----|-------|--------|
-| [EUP-030](tickets/EUP-030.md) | Raspberry Pi deployment guide | `phase-3`, `infra` |
-| [EUP-034](tickets/EUP-034.md) | Rate limiting & basic security | `phase-3`, `feature` |
-| [EUP-035](tickets/EUP-035.md) | Advanced responsive polish | `phase-3`, `feature` |
-| [EUP-038](tickets/EUP-038.md) | Current-year quick entry tool | `phase-3`, `feature` |
-| [EUP-041](tickets/EUP-041.md) | Forgotten password reset | `phase-3`, `feature` |
+| [EUP-042](tickets/EUP-042.md) | Claim guest history after sign-up | `phase-3`, `feature` |
+
+### Phase 3 (deferred)
+
+| ID | Title | Labels |
+|----|-------|--------|
+| [EUP-030](tickets/EUP-030.md) | Raspberry Pi deployment guide | `phase-3`, `infra`, `deferred` |
 
 ## Won't do (for now)
 
@@ -71,6 +80,7 @@ Not planned for the foreseeable future. Specs kept for reference.
 | [EUP-037](tickets/EUP-037.md) | Embedded media player | Media skipped |
 | [EUP-039](tickets/EUP-039.md) | Export results | Use in-app replay instead |
 | [EUP-040](tickets/EUP-040.md) | Jury profile avatars | Nicknames sufficient |
+| [EUP-045](tickets/EUP-045.md) | Presentation viewport fit | Compact fit reverted — scroll OK |
 
 ## Build order (MVP)
 

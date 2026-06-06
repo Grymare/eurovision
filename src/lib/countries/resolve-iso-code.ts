@@ -1,50 +1,31 @@
-const COUNTRY_NAME_TO_ISO: Record<string, string> = {
-  albania: "AL",
-  armenia: "AM",
-  australia: "AU",
-  austria: "AT",
-  azerbaijan: "AZ",
-  belgium: "BE",
-  bulgaria: "BG",
-  croatia: "HR",
-  cyprus: "CY",
-  czechia: "CZ",
+import {
+  EUROVISION_API_COUNTRIES,
+  normalizeEurovisionApiCountryCode,
+} from "@/lib/eurovision/eurovision-api-countries";
+
+const EXTRA_NAME_ALIASES: Record<string, string> = {
   "czech republic": "CZ",
-  denmark: "DK",
-  estonia: "EE",
-  finland: "FI",
-  france: "FR",
-  georgia: "GE",
-  germany: "DE",
-  greece: "GR",
-  israel: "IL",
-  italy: "IT",
-  latvia: "LV",
-  lithuania: "LT",
-  luxembourg: "LU",
-  malta: "MT",
-  moldova: "MD",
-  montenegro: "ME",
-  norway: "NO",
-  poland: "PL",
-  portugal: "PT",
-  romania: "RO",
-  "san marino": "SM",
-  serbia: "RS",
-  slovakia: "SK",
-  slovenia: "SI",
-  spain: "ES",
-  sweden: "SE",
-  switzerland: "CH",
-  ukraine: "UA",
-  "united kingdom": "GB",
+  "the netherlands": "NL",
   uk: "GB",
   "great britain": "GB",
-  ireland: "IE",
-  iceland: "IS",
-  netherlands: "NL",
-  "the netherlands": "NL",
+  "north macedonia": "MK",
+  "former yugoslav republic of macedonia": "MK",
+  "fyrom": "MK",
+  türkiye: "TR",
+  turkiye: "TR",
 };
+
+function buildCountryNameToIso(): Record<string, string> {
+  const byName: Record<string, string> = { ...EXTRA_NAME_ALIASES };
+
+  for (const [isoCode, name] of Object.entries(EUROVISION_API_COUNTRIES)) {
+    byName[name.toLowerCase()] = isoCode;
+  }
+
+  return byName;
+}
+
+const COUNTRY_NAME_TO_ISO = buildCountryNameToIso();
 
 function isoFromFlagEmoji(flagEmoji: string): string | null {
   const chars = [...flagEmoji.trim()];
@@ -79,7 +60,7 @@ export function resolveCountryIsoCode(input: {
 }): string | null {
   const byName = COUNTRY_NAME_TO_ISO[input.name.trim().toLowerCase()];
   if (byName) {
-    return byName;
+    return normalizeEurovisionApiCountryCode(byName);
   }
 
   if (input.flagEmoji) {

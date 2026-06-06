@@ -1,9 +1,11 @@
 import Link from "next/link";
 import { SignOutButton } from "@/components/auth/sign-out-button";
 import { auth } from "@/lib/auth";
+import { isSiteAdmin } from "@/lib/auth/admin";
 
 export async function SiteHeader() {
   const session = await auth();
+  const isAdmin = isSiteAdmin(session?.user?.email);
 
   return (
     <header className="site-header">
@@ -14,6 +16,16 @@ export async function SiteHeader() {
         <nav aria-label="Main" className="site-nav">
           {session?.user ?
             <>
+              {isAdmin ?
+                <>
+                  <Link href="/admin/datasets" className="nav-link">
+                    Datasets
+                  </Link>
+                  <Link href="/admin/legacy-import" className="nav-link">
+                    Import
+                  </Link>
+                </>
+              : null}
               <Link href="/history" className="nav-link">
                 History
               </Link>

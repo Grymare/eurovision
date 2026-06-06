@@ -1,9 +1,16 @@
 "use client";
 
-import { CountrySelect } from "@/components/country-select";
+import { BallotRankHelper } from "@/components/ballot-rank-helper";
+import { EntryCombobox } from "@/components/entry-combobox";
 import { CountryFlag } from "@/components/country-flag";
 import { MIN_PARTY_ENTRIES } from "@/lib/party/constants";
 import { buildDevBallotAllocations } from "@/lib/party/dev-ballot";
+import {
+  clearRankDraft,
+  getRankDraft,
+  mergeRankOrder,
+} from "@/lib/party/rank-draft";
+import { rankedEntryIdsToBallotSlots } from "@/lib/party/rank-to-ballot";
 import type { VoteAllocations } from "@/db/schema";
 import type { SerializedVote } from "@/lib/party/types";
 import {
@@ -58,9 +65,24 @@ function initialMode(vote: SerializedVote | null): BallotMode {
   return vote?.hasVoted ? "waiting" : "editing";
 }
 
-function initialSlots(vote: SerializedVote | null): Record<number, string> {
+function initialSlots(
+  vote: SerializedVote | null,
+  entries: SerializedEntry[],
+  partyCode: string,
+): Record<number, string> {
   if (vote?.allocations) {
     return slotsFromAllocations(vote.allocations);
+  }
+
+  const draft = getRankDraft(partyCode);
+
+  if (draft && entries.length >= MIN_PARTY_ENTRIES) {
+    const orderedIds = mergeRankOrder(
+      draft.orderedIds,
+      entries.map((entry) => entry.id),
+    );
+
+    return rankedEntryIdsToBallotSlots(orderedIds);
   }
 
   return emptySlots();
@@ -110,8 +132,10 @@ export function VoteBallot({
   onSubmitted,
 }: VoteBallotProps) {
   const [mode, setMode] = useState<BallotMode>(() => initialMode(initialVote));
-  const [slots, setSlots] = useState(() => initialSlots(initialVote));
-  const [submittedSlots, setSubmittedSlots] = useState(() => initialSlots(initialVote));
+  const [slots, setSlots] = useState(() => initialSlots(initialVote, entries, partyCode));
+  const [submittedSlots, setSubmittedSlots] = useState(() =>
+    initialSlots(initialVote, entries, partyCode),
+  );
   const [error, setError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const hasSubmittedVote = Boolean(initialVote?.hasVoted);
@@ -154,6 +178,7 @@ export function VoteBallot({
       setSlots(slotsFromAllocations(allocations));
       setSubmittedSlots(slotsFromAllocations(allocations));
       setMode("waiting");
+      clearRankDraft(partyCode);
       onSubmitted?.(submittedVote);
     } catch (submitError) {
       setError(
@@ -253,9 +278,10 @@ export function VoteBallot({
   }
 
   const isEditingSubmittedVote = hasSubmittedVote && mode === "editing";
+  const filledSlotCount = BALLOT_POINT_ORDER.filter((points) => Boolean(slots[points])).length;
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-5" aria-labelledby="ballot-heading">
+    <form onSubmit={handleSubmit} className="vote-ballot space-y-5" aria-labelledby="ballot-heading">
       <div className="space-y-2">
         <h3 id="ballot-heading" className="section-heading">
           {isEditingSubmittedVote ? "Edit your vote" : "Your ballot"}
@@ -263,9 +289,27 @@ export function VoteBallot({
         <p className="text-sm leading-6 text-muted">
           Assign 1, 2, 3, 4, 5, 6, 7, 8, 10, and 12 points to ten different countries.
         </p>
+        <p className="vote-ballot__progress" aria-live="polite">
+          <span className="vote-ballot__progress-count">
+            {filledSlotCount} / {BALLOT_POINT_ORDER.length}
+          </span>
+          <span className="text-muted">countries selected</span>
+        </p>
       </div>
 
-      <ol className="space-y-3">
+      <BallotRankHelper
+        key={entries.map((entry) => entry.id).join("-")}
+        partyCode={partyCode}
+        entries={entries}
+        alwaysOpen
+        fullSize
+        onApply={(nextSlots) => {
+          setSlots(nextSlots);
+          setError(null);
+        }}
+      />
+
+      <ol className="vote-ballot__list space-y-3">
         {BALLOT_POINT_ORDER.map((points) => {
           const selectedElsewhere = new Set(
             Object.entries(slots)
@@ -274,15 +318,15 @@ export function VoteBallot({
           );
 
           return (
-            <li key={points} className="grid gap-3 sm:grid-cols-[4rem_1fr] sm:items-center">
-              <span className="text-sm font-semibold tracking-[0.18em] text-gold-light">
+            <li key={points} className="vote-ballot__row grid gap-3 sm:grid-cols-[4rem_1fr] sm:items-center">
+              <span className="vote-ballot__points text-sm font-semibold tracking-[0.18em] text-gold-light">
                 {points}
               </span>
               <div className="space-y-1">
                 <label htmlFor={`vote-${points}`} className="sr-only">
                   Country for {points} points
                 </label>
-                <CountrySelect
+                <EntryCombobox
                   id={`vote-${points}`}
                   value={slots[points] ?? ""}
                   onChange={(entryId) => updateSlot(points, entryId)}
@@ -295,14 +339,14 @@ export function VoteBallot({
         })}
       </ol>
 
-      {error ? (
+      {error ?
         <p role="alert" className="text-sm text-danger">
           {error}
         </p>
-      ) : null}
+      : null}
 
-      <div className="flex flex-wrap gap-3">
-        <button type="submit" disabled={isSubmitting} className="btn-primary">
+      <div className="vote-ballot__actions flex flex-wrap gap-3">
+        <button type="submit" disabled={isSubmitting} className="btn-primary w-full sm:w-auto">
           {isSubmitting ?
             "Submitting…"
           : isEditingSubmittedVote ?

@@ -218,10 +218,6 @@ export function EntryPicker({
             <p className="mt-1 text-sm text-muted">
               At least {MIN_PARTY_ENTRIES} countries before guests can join and voting can start.
             </p>
-          : !canEdit && entries.length > 0 ?
-            <p className="mt-1 text-sm text-muted">
-              Use Edit countries in host controls to change this list.
-            </p>
           : null}
         </div>
         <div className="flex flex-wrap items-center gap-3">
@@ -279,6 +275,34 @@ export function EntryPicker({
         </ul>
       )}
 
+      {canEdit ?
+        <form
+          onSubmit={handleAdd}
+          className="grid gap-4 border-t border-stage-border pt-5 sm:grid-cols-[1fr_auto]"
+        >
+          <div className="space-y-2">
+            <label htmlFor="entry-name" className="field-label">
+              Add country
+            </label>
+            <CountryAutocomplete
+              id="entry-name"
+              value={name}
+              onChange={setName}
+              disabled={isSubmitting}
+            />
+          </div>
+          <div className="flex items-end">
+            <button
+              type="submit"
+              disabled={isSubmitting || !findCountryCatalogEntry(name)}
+              className="btn-secondary w-full sm:w-auto"
+            >
+              Add
+            </button>
+          </div>
+        </form>
+      : null}
+
       {canEdit && availableYears.length > 0 ?
         <div className="space-y-3 border-t border-stage-border pt-5">
           <div className="space-y-2">
@@ -330,34 +354,6 @@ export function EntryPicker({
             Dev-only shortcut. Adds all 25 Vienna 2026 Grand Final countries; skips names already in the list.
           </p>
         </div>
-      : null}
-
-      {canEdit ?
-        <form
-          onSubmit={handleAdd}
-          className="grid gap-4 border-t border-stage-border pt-5 sm:grid-cols-[1fr_auto]"
-        >
-          <div className="space-y-2">
-            <label htmlFor="entry-name" className="field-label">
-              Add country
-            </label>
-            <CountryAutocomplete
-              id="entry-name"
-              value={name}
-              onChange={setName}
-              disabled={isSubmitting}
-            />
-          </div>
-          <div className="flex items-end">
-            <button
-              type="submit"
-              disabled={isSubmitting || !findCountryCatalogEntry(name)}
-              className="btn-secondary w-full sm:w-auto"
-            >
-              Add
-            </button>
-          </div>
-        </form>
       : null}
 
       {error ?

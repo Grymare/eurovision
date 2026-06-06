@@ -749,3 +749,55 @@
     opacity: 0.4;
   }
 }
+
+/* EUP-035 — presentation / tablet / TV scaling */
+@media (min-width: 48rem) {
+  .presentation-page .sb-var__row {
+    height: 3.375rem;
+    min-height: 3.375rem;
+  }
+
+  .presentation-page .sb-var__flag {
+    flex-basis: calc(3.375rem * 3 / 2);
+    width: calc(3.375rem * 3 / 2);
+  }
+
+  .presentation-page .sb-var__name {
+    font-size: 0.875rem;
+  }
+
+  .presentation-page .sb-var__score {
+    font-size: 1.125rem;
+  }
+
+  .presentation-page .sb-var__round {
+    min-width: 2.25rem;
+    font-size: 1rem;
+  }
+}
+
+@media (min-width: 80rem) {
+  .presentation-page .sb-var__row {
+    height: 3.75rem;
+    min-height: 3.75rem;
+  }
+
+  .presentation-page .sb-var__flag {
+    flex-basis: calc(3.75rem * 3 / 2);
+    width: calc(3.75rem * 3 / 2);
+  }
+
+  .presentation-page .sb-var__name {
+    font-size: 0.9375rem;
+  }
+
+  .presentation-page .sb-var__score {
+    font-size: 1.25rem;
+  }
+}
+
+@media (min-width: 48rem) and (orientation: landscape) {
+  .presentation-page .ev-scoreboard {
+    gap: 1rem;
+  }
+}

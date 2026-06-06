@@ -176,6 +176,17 @@ export async function listFinishedPartiesForUser(userId: string): Promise<Finish
   );
 }
 
+export async function deleteFinishedPartyByCode(code: string) {
+  const normalizedCode = code.trim().toUpperCase();
+
+  const deleted = await db
+    .delete(parties)
+    .where(and(eq(parties.code, normalizedCode), eq(parties.state, "finished")))
+    .returning({ id: parties.id });
+
+  return deleted.length > 0;
+}
+
 function countryKey(name: string, flagEmoji: string) {
   return `${name}::${flagEmoji}`;
 }

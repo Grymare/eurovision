@@ -1,4 +1,5 @@
 import { LoginForm } from "@/components/auth/login-form";
+import { isEmailConfigured } from "@/lib/auth/email";
 import { Suspense } from "react";
 
 export const dynamic = "force-dynamic";
@@ -7,7 +8,7 @@ export default function LoginPage() {
   const googleEnabled = Boolean(
     process.env.AUTH_GOOGLE_ID && process.env.AUTH_GOOGLE_SECRET,
   );
-  const magicLinkEnabled = Boolean(process.env.EMAIL_SERVER && process.env.EMAIL_FROM);
+  const emailEnabled = isEmailConfigured();
 
   return (
     <main id="main-content" className="page-main section-stack max-w-md">
@@ -22,7 +23,11 @@ export default function LoginPage() {
 
       <section className="section-block">
         <Suspense fallback={<p className="text-sm text-muted">Loading…</p>}>
-          <LoginForm googleEnabled={googleEnabled} magicLinkEnabled={magicLinkEnabled} />
+          <LoginForm
+            googleEnabled={googleEnabled}
+            magicLinkEnabled={emailEnabled}
+            passwordResetEnabled={emailEnabled}
+          />
         </Suspense>
       </section>
     </main>

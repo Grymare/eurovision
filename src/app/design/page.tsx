@@ -23,6 +23,15 @@ export default function DesignPage() {
               </span>
             </Link>
           </li>
+          <li>
+            <Link href="/design/google-button" className="design-index__link">
+              <span className="design-index__title">Google sign-in button</span>
+              <span className="design-index__meta">
+                Nine OAuth button styles for the dark gold login page — current white neutral plus
+                themed alternatives.
+              </span>
+            </Link>
+          </li>
         </ul>
       </section>
     </main>

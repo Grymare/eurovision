@@ -1,5 +1,6 @@
 import { getParticipantSessionToken } from "@/lib/auth/cookies";
 import { toErrorResponse } from "@/lib/http/errors";
+import { assertRateLimit } from "@/lib/http/rate-limit";
 import {
   getParticipantVote,
   parseVoteAllocations,
@@ -42,6 +43,9 @@ export async function PUT(request: Request, context: RouteContext) {
     const party = await resolvePartyRef(code);
     const participantToken = await getParticipantSessionToken();
     const participant = await requireParticipantForParty(participantToken, code);
+
+    assertRateLimit(`vote:${participantToken}`, 30, 10 * 60 * 1000);
+
     const body = (await request.json()) as { allocations?: VoteAllocations };
 
     if (!body.allocations || typeof body.allocations !== "object") {

@@ -1,4 +1,4 @@
-﻿# Grymare Eurovision
+# Grymare Eurovision
 
 Eurovision-style voting parties for you and your friends. Public home: **https://eurovision.grymare.com** (Cloudflare Tunnel from your PC; domain on Cloudflare).
 
@@ -87,10 +87,12 @@ Find your IP: `ipconfig` (Windows). Allow port 3000 through the firewall if need
 - Kanban board: [docs/kanban.md](docs/kanban.md)
 - Ticket specs: [docs/tickets/](docs/tickets/)
 - Deploy guide: [docs/deploy/cloudflare-tunnel.md](docs/deploy/cloudflare-tunnel.md)
+- Raspberry Pi: [docs/deploy/raspberry-pi.md](docs/deploy/raspberry-pi.md)
+- Security: [docs/deploy/security.md](docs/deploy/security.md)
 - Smoke test: [docs/deploy/smoke-test-checklist.md](docs/deploy/smoke-test-checklist.md)
 
 GitHub CLI (`gh`) is not required locally. To mirror tickets in GitHub Issues + Projects, create a repo and import titles from `docs/tickets/`.
 
 ## Build order
 
-See `docs/kanban.md` for the full backlog. **Phase 2** (auth, history, stats) is complete. **Phase 3** is next: Pi guide, rate limiting, responsive polish.
+See `docs/kanban.md` for the full backlog. **Phase 3** in progress: rate limits (done), responsive polish, quick entry tool, password reset. Pi guide deferred until hardware arrives.

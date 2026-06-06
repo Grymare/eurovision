@@ -9,19 +9,35 @@ import { useState } from "react";
 type LoginFormProps = {
   googleEnabled: boolean;
   magicLinkEnabled: boolean;
+  passwordResetEnabled: boolean;
 };
 
-export function LoginForm({ googleEnabled, magicLinkEnabled }: LoginFormProps) {
+type LoginMethod = "password" | "magic-link";
+
+export function LoginForm({
+  googleEnabled,
+  magicLinkEnabled,
+  passwordResetEnabled,
+}: LoginFormProps) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get("callbackUrl") ?? "/";
   const authError = searchParams.get("error");
+  const passwordResetSuccess = searchParams.get("reset") === "1";
+  const [method, setMethod] = useState<LoginMethod>("password");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [magicEmail, setMagicEmail] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [message, setMessage] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+
+  function switchMethod(nextMethod: LoginMethod) {
+    setMethod(nextMethod);
+    setError(null);
+    if (nextMethod === "password") {
+      setMessage(null);
+    }
+  }
 
   async function handlePasswordLogin(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();
@@ -53,7 +69,7 @@ export function LoginForm({ googleEnabled, magicLinkEnabled }: LoginFormProps) {
     setMessage(null);
 
     const result = await signIn("nodemailer", {
-      email: magicEmail,
+      email,
       redirect: false,
       callbackUrl,
     });
@@ -68,9 +84,52 @@ export function LoginForm({ googleEnabled, magicLinkEnabled }: LoginFormProps) {
     setMessage("Check your email for a sign-in link.");
   }
 
+  const usingPassword = !magicLinkEnabled || method === "password";
+
   return (
     <div className="space-y-8">
-      <form onSubmit={handlePasswordLogin} className="space-y-5">
+      {magicLinkEnabled ?
+        <div role="tablist" aria-label="Sign-in method" className="auth-segment">
+          <button
+            type="button"
+            role="tab"
+            id="login-tab-password"
+            aria-selected={usingPassword}
+            aria-controls="login-panel"
+            className={
+              usingPassword ?
+                "auth-segment__option auth-segment__option--active"
+              : "auth-segment__option"
+            }
+            onClick={() => switchMethod("password")}
+          >
+            Password
+          </button>
+          <button
+            type="button"
+            role="tab"
+            id="login-tab-magic-link"
+            aria-selected={!usingPassword}
+            aria-controls="login-panel"
+            className={
+              !usingPassword ?
+                "auth-segment__option auth-segment__option--active"
+              : "auth-segment__option"
+            }
+            onClick={() => switchMethod("magic-link")}
+          >
+            Magic link
+          </button>
+        </div>
+      : null}
+
+      <form
+        id="login-panel"
+        role="tabpanel"
+        aria-labelledby={usingPassword ? "login-tab-password" : "login-tab-magic-link"}
+        onSubmit={usingPassword ? handlePasswordLogin : handleMagicLink}
+        className="space-y-5"
+      >
         <div className="space-y-2">
           <label htmlFor="login-email" className="field-label">
             Email
@@ -84,22 +143,51 @@ export function LoginForm({ googleEnabled, magicLinkEnabled }: LoginFormProps) {
             onChange={(event) => setEmail(event.target.value)}
             className="field-input"
           />
+          {!usingPassword ?
+            <p className="text-sm text-muted">
+              We will email you a one-time sign-in link — no password needed.
+            </p>
+          : null}
         </div>
 
-        <div className="space-y-2">
-          <label htmlFor="login-password" className="field-label">
-            Password
-          </label>
-          <input
-            id="login-password"
-            type="password"
-            autoComplete="current-password"
-            required
-            value={password}
-            onChange={(event) => setPassword(event.target.value)}
-            className="field-input"
-          />
-        </div>
+        {usingPassword ?
+          <div className="space-y-2">
+            <div className="flex items-end justify-between gap-3">
+              <label htmlFor="login-password" className="field-label">
+                Password
+              </label>
+              {passwordResetEnabled ?
+                <Link
+                  href="/auth/forgot-password"
+                  className="text-xs text-muted underline-offset-4 hover:text-foreground hover:underline"
+                >
+                  Forgot password?
+                </Link>
+              : null}
+            </div>
+            <input
+              id="login-password"
+              type="password"
+              autoComplete="current-password"
+              required
+              value={password}
+              onChange={(event) => setPassword(event.target.value)}
+              className="field-input"
+            />
+          </div>
+        : null}
+
+        {passwordResetSuccess && usingPassword ?
+          <p role="status" className="text-sm text-gold-light">
+            Password updated. Sign in with your new password.
+          </p>
+        : null}
+
+        {message ?
+          <p role="status" className="text-sm text-gold-light">
+            {message}
+          </p>
+        : null}
 
         {error ? (
           <p role="alert" className="text-sm text-danger">
@@ -117,7 +205,13 @@ export function LoginForm({ googleEnabled, magicLinkEnabled }: LoginFormProps) {
         : null}
 
         <button type="submit" disabled={isSubmitting} className="btn-primary">
-          {isSubmitting ? "Signing in…" : "Sign in"}
+          {usingPassword ?
+            isSubmitting ?
+              "Signing in…"
+            : "Sign in"
+          : isSubmitting ?
+            "Sending link…"
+          : "Email me a link"}
         </button>
       </form>
 
@@ -126,40 +220,6 @@ export function LoginForm({ googleEnabled, magicLinkEnabled }: LoginFormProps) {
           <p className="text-center text-xs uppercase tracking-[0.2em] text-muted">Or continue with Google</p>
           <GoogleSignInButton intent="login" callbackUrl={callbackUrl} disabled={isSubmitting} />
         </>
-      : null}
-
-      {magicLinkEnabled ?
-        <form onSubmit={handleMagicLink} className="space-y-5 border-t border-stage-border pt-8">
-          <div className="space-y-2">
-            <h3 className="text-sm font-medium uppercase tracking-[0.16em] text-foreground">
-              Magic link
-            </h3>
-            <p className="text-sm text-muted">
-              We will email you a one-time sign-in link — no password needed.
-            </p>
-          </div>
-
-          <div className="space-y-2">
-            <label htmlFor="magic-email" className="field-label">
-              Email
-            </label>
-            <input
-              id="magic-email"
-              type="email"
-              autoComplete="email"
-              required
-              value={magicEmail}
-              onChange={(event) => setMagicEmail(event.target.value)}
-              className="field-input"
-            />
-          </div>
-
-          {message ? <p className="text-sm text-foreground">{message}</p> : null}
-
-          <button type="submit" disabled={isSubmitting} className="btn-secondary">
-            Email me a link
-          </button>
-        </form>
       : null}
 
       <p className="text-sm text-muted">

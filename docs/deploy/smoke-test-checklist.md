@@ -77,8 +77,20 @@ Run after auth, history, stats, and year-import changes are deployed.
 - [ ] Google sign-in redirects back to `https://eurovision.grymare.com` (not localhost)
 - [ ] Non-admin logged-in user cannot create a party
 - [ ] Admin (`ADMIN_EMAILS`) can create a party and is auto-joined as host
+- [ ] **Magic link** — “Email me a link” visible on login; email arrives with sign-in link
+- [ ] **Forgot password** — reset email arrives; new password works; login shows success after reset
+
+## Admin datasets (EUP-038)
+
+- [ ] Admin opens **Manage Eurovision year datasets** from home → `/admin/datasets`
+- [ ] **Sync from API** loads Grand Final countries for a year (preview)
+- [ ] **Save dataset** persists without Docker rebuild; lobby import dropdown shows the year
+- [ ] **Export JSON** downloads `{year}.json`; **Import JSON** restores a dataset
 
 ## Party flow (Phase 2 updates)
+
+- [ ] Ballot country pickers are **searchable comboboxes** (type to filter)
+- [ ] **Help me rank** drag list pre-fills top 10 ballot slots; juror can edit before submit
 
 - [ ] New party starts in **lobby** (no separate “open lobby” step)
 - [ ] Copy join link enabled once **10+ countries** are set

@@ -1,6 +1,7 @@
 import { auth } from "@/lib/auth";
 import { setParticipantSessionCookie } from "@/lib/auth/cookies";
 import { AppError, toErrorResponse } from "@/lib/http/errors";
+import { assertRateLimit } from "@/lib/http/rate-limit";
 import { parseJsonBody } from "@/lib/http/validation";
 import {
   joinParty,
@@ -20,6 +21,9 @@ export async function POST(request: Request) {
   try {
     const session = await auth();
     const body = parseJsonBody(joinPartySchema, await request.json());
+    const partyCode = body.code.trim().toUpperCase();
+
+    assertRateLimit(`join:${partyCode}`, 40, 10 * 60 * 1000);
 
     const nickname =
       session?.user?.name?.trim() ||
@@ -31,7 +35,7 @@ export async function POST(request: Request) {
     }
 
     const result = await joinParty({
-      code: body.code,
+      code: partyCode,
       nickname,
       userId: session?.user?.id,
     });

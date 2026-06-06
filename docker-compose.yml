@@ -16,7 +16,9 @@
       PUBLIC_APP_URL: https://eurovision.grymare.com
     volumes:
       - app-data:/app/data
+      - eurovision-datasets-data:/app/eurovision-datasets
     restart: unless-stopped
 
 volumes:
   app-data:
+  eurovision-datasets-data:

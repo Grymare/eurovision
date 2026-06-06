@@ -1,55 +1,14 @@
-import { isoToFlagEmoji } from "@/lib/countries/iso-to-flag-emoji";
 import { resolveCountryIsoCode } from "@/lib/countries/resolve-iso-code";
+import {
+  EUROVISION_API_COUNTRIES,
+  getEurovisionCountryFlag,
+} from "@/lib/eurovision/eurovision-api-countries";
 import { EUROVISION_2026_PARTICIPANTS } from "@/lib/party/mock-data/eurovision-2026-participants";
 
 export type CountryCatalogEntry = {
   name: string;
   isoCode: string;
   flagEmoji: string;
-};
-
-const ISO_DISPLAY_NAMES: Record<string, string> = {
-  AL: "Albania",
-  AM: "Armenia",
-  AU: "Australia",
-  AT: "Austria",
-  AZ: "Azerbaijan",
-  BE: "Belgium",
-  BG: "Bulgaria",
-  HR: "Croatia",
-  CY: "Cyprus",
-  CZ: "Czechia",
-  DK: "Denmark",
-  EE: "Estonia",
-  FI: "Finland",
-  FR: "France",
-  GE: "Georgia",
-  DE: "Germany",
-  GR: "Greece",
-  IE: "Ireland",
-  IS: "Iceland",
-  IL: "Israel",
-  IT: "Italy",
-  LV: "Latvia",
-  LT: "Lithuania",
-  LU: "Luxembourg",
-  MT: "Malta",
-  MD: "Moldova",
-  ME: "Montenegro",
-  NL: "Netherlands",
-  NO: "Norway",
-  PL: "Poland",
-  PT: "Portugal",
-  RO: "Romania",
-  SM: "San Marino",
-  RS: "Serbia",
-  SK: "Slovakia",
-  SI: "Slovenia",
-  ES: "Spain",
-  SE: "Sweden",
-  CH: "Switzerland",
-  UA: "Ukraine",
-  GB: "United Kingdom",
 };
 
 function buildCatalog(): CountryCatalogEntry[] {
@@ -69,7 +28,7 @@ function buildCatalog(): CountryCatalogEntry[] {
     });
   }
 
-  for (const [isoCode, name] of Object.entries(ISO_DISPLAY_NAMES)) {
+  for (const [isoCode, name] of Object.entries(EUROVISION_API_COUNTRIES)) {
     if (byIso.has(isoCode)) {
       continue;
     }
@@ -77,7 +36,7 @@ function buildCatalog(): CountryCatalogEntry[] {
     byIso.set(isoCode, {
       name,
       isoCode,
-      flagEmoji: isoToFlagEmoji(isoCode),
+      flagEmoji: getEurovisionCountryFlag(isoCode),
     });
   }
 

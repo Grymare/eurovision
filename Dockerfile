@@ -28,7 +28,9 @@ COPY --from=builder /app/tsconfig.json ./tsconfig.json
 COPY --from=builder /app/next.config.ts ./next.config.ts
 COPY --from=builder /app/server.ts ./server.ts
 COPY --from=builder /app/src ./src
+COPY --from=builder /app/scripts ./scripts
 COPY --from=builder /app/drizzle ./drizzle
+COPY --from=builder /app/data/eurovision ./eurovision-datasets-seed
 COPY --from=builder /app/data/eurovision ./eurovision-datasets
 COPY --from=builder /app/drizzle.config.ts ./drizzle.config.ts
 RUN mkdir -p /app/data

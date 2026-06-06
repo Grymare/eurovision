@@ -33,7 +33,9 @@ Year files live in [`data/eurovision/`](../data/eurovision/). Shipped datasets: 
 
 Loader: [`src/lib/eurovision/datasets.ts`](../src/lib/eurovision/datasets.ts)
 
-In Docker, year files are copied to `/app/eurovision-datasets` (outside the `/app/data` volume mount).
+In Docker, year files live in the **`eurovision-datasets-data` volume** at `/app/eurovision-datasets`. On first run, seeded copies from the image (`eurovision-datasets-seed`). Admins can edit datasets at **`/admin/datasets`** without rebuilding (EUP-038).
+
+See also [eurovision-api.md](eurovision-api.md) for API sync details.
 
 ## API
 

@@ -29,7 +29,17 @@ pnpm db:push
 
 - `/auth/login` — password, Google (if configured), magic link (if `EMAIL_SERVER` + `EMAIL_FROM` set)
 - `/auth/register` — open registration
-- `/api/auth/*` — Auth.js handlers
+- `/auth/forgot-password` — request reset link (requires email config)
+- `/auth/reset-password?token=…` — set new password from email link
+- `/api/auth/*` — Auth.js handlers + register / forgot-password / reset-password
+
+## Password reset
+
+Requires the same **`EMAIL_SERVER`** and **`EMAIL_FROM`** as magic link. The login page shows **Forgot password?** only when email is configured.
+
+- Reset links expire after **1 hour** and are single-use
+- Google-only accounts (no password hash) do not receive a reset email; the request still returns a generic success message
+- Rate limit: 3 forgot-password requests per email per hour
 
 ## Schema
 

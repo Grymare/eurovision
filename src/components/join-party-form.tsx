@@ -80,6 +80,12 @@ export function JoinPartyForm({
           required
           minLength={4}
           maxLength={8}
+          inputMode="text"
+          autoComplete="off"
+          autoCapitalize="characters"
+          spellCheck={false}
+          enterKeyHint="go"
+          placeholder="ABCD"
           value={code}
           onChange={(event) => setCode(event.target.value.toUpperCase())}
           className="field-input font-mono uppercase tracking-[0.3em]"
@@ -115,7 +121,7 @@ export function JoinPartyForm({
         </p>
       ) : null}
 
-      <button type="submit" disabled={isSubmitting} className="btn-primary">
+      <button type="submit" disabled={isSubmitting} className="btn-primary w-full sm:w-auto">
         {isSubmitting ? "Joining…" : "Join party"}
       </button>
     </form>

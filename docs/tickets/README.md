@@ -1,4 +1,4 @@
-﻿# Ticket index
+# Ticket index
 
 MVP specs for Grymare Eurovision. See [kanban](../kanban.md) for board status.
 
@@ -8,27 +8,30 @@ MVP specs for Grymare Eurovision. See [kanban](../kanban.md) for board status.
 |----|-------|
 | [EUP-001](EUP-001.md) – [EUP-019](EUP-019.md), [EUP-007A](EUP-007A.md), [EUP-007B](EUP-007B.md) | See kanban Done column |
 
-## Phase 2 (active backlog)
+## Phase 2 (done)
 
-| ID | Title |
-|----|-------|
-| [EUP-005](EUP-005.md) | Optional account auth |
-| [EUP-029](EUP-029.md) | Admin-only party creation |
-| [EUP-020](EUP-020.md) | Eurovision year JSON datasets |
-| [EUP-021](EUP-021.md) | Import party from year |
-| [EUP-024](EUP-024.md) | Party history list |
-| [EUP-025](EUP-025.md) | Party detail replay |
-| [EUP-026](EUP-026.md) | Cross-party stats |
+See kanban Done column — EUP-005 through EUP-026.
 
 ## Phase 3 (active backlog)
 
 | ID | Title |
 |----|-------|
-| [EUP-030](EUP-030.md) | Raspberry Pi deployment guide |
-| [EUP-034](EUP-034.md) | Rate limiting & basic security |
-| [EUP-035](EUP-035.md) | Advanced responsive polish |
+| [EUP-042](EUP-042.md) | Claim guest history after sign-up |
+
+## Phase 3 (done — recent)
+
+| ID | Title |
+|----|-------|
+| [EUP-044](EUP-044.md) | Searchable country combobox in ballot |
+| [EUP-046](EUP-046.md) | Pre-vote ranking & favorite finders |
 | [EUP-038](EUP-038.md) | Current-year quick entry tool |
-| [EUP-041](EUP-041.md) | Forgotten password reset |
+| [EUP-043](EUP-043.md) | Import legacy party results |
+
+## Deferred (no Pi yet)
+
+| ID | Title |
+|----|-------|
+| [EUP-030](EUP-030.md) | Raspberry Pi deployment guide (draft in `docs/deploy/raspberry-pi.md`) |
 
 ## Won't do (for now)
 

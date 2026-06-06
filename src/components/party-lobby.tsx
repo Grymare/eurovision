@@ -1,8 +1,8 @@
 "use client";
 
 import { ConfirmPanel } from "@/components/confirm-panel";
+import { LobbyRankPrep } from "@/components/lobby-rank-prep";
 import { EntryPicker } from "@/components/entry-picker";
-import { CountryFlag } from "@/components/country-flag";
 import { Toast } from "@/components/toast";
 import { VoteBallot } from "@/components/vote-ballot";
 import { usePartySocket } from "@/hooks/use-party-socket";
@@ -294,19 +294,29 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
     setIsEditingCountries(true);
   }
 
+  function finishEditingCountries() {
+    setIsEditingCountries(false);
+    setMessage("Country list saved.");
+    setError(null);
+  }
+
   const inSetupPhase = data.party.state === "draft" || data.party.state === "lobby";
   const autoEditCountries = inSetupPhase && data.entries.length === 0;
 
   const canEditEntries =
     data.viewer.isHost && inSetupPhase && (isEditingCountries || autoEditCountries);
 
-  const showCountryList = inSetupPhase;
+  const showHostEntryPicker = data.viewer.isHost && inSetupPhase && canEditEntries;
 
   const showBallot =
     data.viewer.participant &&
     (data.party.state === "voting_open" ||
       data.party.state === "voting_closed" ||
       data.party.state === "presenting");
+
+  const showLobbyRanker =
+    data.entries.length >= MIN_PARTY_ENTRIES && !showBallot;
+
   const votingLocked = data.party.state !== "voting_open";
 
   const canRemoveJuryMembers =
@@ -362,6 +372,12 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
         </div>
       </section>
 
+      {showLobbyRanker ? (
+        <section className="section-block">
+          <LobbyRankPrep partyCode={partyCode} entries={data.entries} />
+        </section>
+      ) : null}
+
       {data.viewer.isHost ? (
         <section aria-labelledby="host-controls-heading" className="section-block space-y-4">
           <h2 id="host-controls-heading" className="section-heading">
@@ -397,7 +413,16 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
                 >
                   Start voting
                 </button>
-                {!isEditingCountries && data.entries.length > 0 ?
+                {canEditEntries && data.entries.length > 0 ?
+                  <button
+                    type="button"
+                    disabled={isUpdating}
+                    onClick={finishEditingCountries}
+                    className="btn-secondary"
+                  >
+                    Save countries
+                  </button>
+                : !canEditEntries && data.entries.length > 0 ?
                   <button
                     type="button"
                     disabled={isUpdating}
@@ -510,28 +535,14 @@ export function PartyLobby({ initialData, devMockDataEnabled = false }: PartyLob
         </section>
       ) : null}
 
-      {showCountryList ?
-        data.viewer.isHost ?
-          <EntryPicker
-            partyCode={partyCode}
-            initialEntries={data.entries}
-            canEdit={canEditEntries}
-            devMockDataEnabled={devMockDataEnabled}
-            onChange={refresh}
-          />
-        : <section className="section-block">
-            <h2 className="section-heading">Countries</h2>
-            <ul className="mt-4">
-              {data.entries.map((entry) => (
-                <li key={entry.id} className="list-row">
-                  <span className="flex items-center gap-3">
-                    <CountryFlag name={entry.name} flagEmoji={entry.flagEmoji} />
-                    <span>{entry.name}</span>
-                  </span>
-                </li>
-              ))}
-            </ul>
-          </section>
+      {showHostEntryPicker ?
+        <EntryPicker
+          partyCode={partyCode}
+          initialEntries={data.entries}
+          canEdit
+          devMockDataEnabled={devMockDataEnabled}
+          onChange={refresh}
+        />
       : null}
 
       <section aria-labelledby="participants-heading" className="section-block">

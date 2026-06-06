@@ -43,6 +43,7 @@ export default async function HistoryPage() {
       <section className="section-block">
         <PartyHistoryList
           parties={parties}
+          allowRemove={isAdmin}
           emptyMessage={
             isAdmin ?
               "No finished parties yet."

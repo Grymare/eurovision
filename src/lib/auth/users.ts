@@ -56,3 +56,20 @@ export async function verifyUserPassword(
     name: user.name,
   };
 }
+
+export async function updateUserPassword(email: string, password: string) {
+  const user = await getUserByEmail(email);
+
+  if (!user) {
+    return null;
+  }
+
+  const passwordHash = await bcrypt.hash(password, 12);
+
+  db.update(users)
+    .set({ passwordHash })
+    .where(eq(users.id, user.id))
+    .run();
+
+  return user;
+}

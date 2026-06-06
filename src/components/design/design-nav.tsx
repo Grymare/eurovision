@@ -3,6 +3,7 @@ import Link from "next/link";
 const DESIGN_LINKS = [
   { href: "/design", label: "Overview" },
   { href: "/design/scoreboard", label: "Scoreboard rows" },
+  { href: "/design/google-button", label: "Google button" },
 ] as const;
 
 export function DesignNav() {
